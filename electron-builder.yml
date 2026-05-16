@@ -1,0 +1,42 @@
+appId: com.noteunarchive.app
+productName: NoteUnarchive
+copyright: Copyright © 2026
+electronDist: node_modules/electron/dist
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**/*
+  - package.json
+  - node_modules/**/*
+  - "!tmp/**"
+
+asar: true
+asarUnpack:
+  - "node_modules/better-sqlite3/**/*"
+
+win:
+  icon: build/icon.ico
+  signAndEditExecutable: false
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: zip
+      arch: [x64]
+
+nsis:
+  oneClick: true
+  perMachine: false
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  shortcutName: NoteUnarchive
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  artifactName: "NoteUnarchive-Setup-${version}.exe"
+
+artifactName: "${productName}-${version}-win-portable.${ext}"
+
+npmRebuild: true
+afterPack: scripts/after-pack.js

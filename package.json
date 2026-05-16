@@ -1,0 +1,33 @@
+{
+  "name": "noteunarchive",
+  "version": "1.0.0",
+  "description": "纯本地笔记导出工具。直接读取笔记软件在本地落盘的数据库文件，批量导出为开放格式。",
+  "main": "src/main/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node scripts/start.js",
+    "build": "cross-env ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/ electron-builder --win",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "test": "jest"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "<rootDir>/tmp/"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "12.10.0",
+    "fast-xml-parser": "5.8.0"
+  },
+  "devDependencies": {
+    "cross-env": "10.1.0",
+    "electron-builder": "26.8.1",
+    "electron-rebuild": "3.2.9",
+    "electron": "33.4.1",
+    "jest": "30.4.2"
+  }
+}

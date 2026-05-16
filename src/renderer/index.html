@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NoteUnarchive</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "outline": "#8b90a0",
+          "primary": "#adc6ff",
+          "surface-dim": "#121414",
+          "error-container": "#93000a",
+          "error": "#ffb4ab",
+          "on-primary": "#002e69",
+          "primary-fixed-dim": "#adc6ff",
+          "tertiary-fixed-dim": "#c8c6c7",
+          "on-surface": "#e2e2e2",
+          "surface-container-highest": "#333535",
+          "surface-container-lowest": "#0c0f0f",
+          "on-tertiary-fixed": "#1b1b1c",
+          "tertiary": "#c8c6c7",
+          "on-error": "#690005",
+          "inverse-surface": "#e2e2e2",
+          "on-primary-fixed": "#001a41",
+          "surface-tint": "#adc6ff",
+          "background": "#121414",
+          "tertiary-container": "#929091",
+          "on-secondary-container": "#b9b8bc",
+          "secondary-fixed": "#e4e1e6",
+          "on-secondary-fixed-variant": "#46464a",
+          "on-tertiary": "#303031",
+          "secondary": "#c7c6ca",
+          "inverse-primary": "#005bc1",
+          "primary-fixed": "#d8e2ff",
+          "on-error-container": "#ffdad6",
+          "on-secondary-fixed": "#1b1b1f",
+          "on-primary-fixed-variant": "#004493",
+          "secondary-container": "#49494d",
+          "surface-container-low": "#1a1c1c",
+          "surface": "#121414",
+          "surface-variant": "#333535",
+          "inverse-on-surface": "#2f3131",
+          "on-primary-container": "#00285c",
+          "surface-bright": "#37393a",
+          "tertiary-fixed": "#e5e2e3",
+          "on-tertiary-fixed-variant": "#474647",
+          "outline-variant": "#414755",
+          "on-background": "#e2e2e2",
+          "on-secondary": "#303034",
+          "on-surface-variant": "#c1c6d7",
+          "primary-container": "#4b8eff",
+          "surface-container": "#1e2020",
+          "secondary-fixed-dim": "#c7c6ca",
+          "on-tertiary-container": "#2a292b",
+          "surface-container-high": "#282a2b"
+        },
+        borderRadius: {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        spacing: {
+          "sm": "8px",
+          "gutter": "12px",
+          "xl": "40px",
+          "md": "16px",
+          "container-margin": "20px",
+          "xs": "4px",
+          "lg": "24px",
+          "unit": "4px"
+        },
+        fontFamily: {
+          "body-base": ["Inter"],
+          "body-sm": ["Inter"],
+          "data-tabular": ["JetBrains Mono"],
+          "display-lg": ["Inter"],
+          "headline-md": ["Inter"],
+          "mono-label": ["JetBrains Mono"]
+        },
+        fontSize: {
+          "body-base": ["14px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+          "body-sm": ["13px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+          "data-tabular": ["13px", {"lineHeight": "1.2", "letterSpacing": "0", "fontWeight": "400"}],
+          "display-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "headline-md": ["20px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "mono-label": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #121414; }
+  ::-webkit-scrollbar-thumb { background: #333535; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #414755; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased h-screen overflow-hidden selection:bg-primary-container selection:text-on-primary-container">
+
+<!-- ═══════════════════════════════════════════════════════════
+     SHARED SIDE NAV
+     ═══════════════════════════════════════════════════════════ -->
+<nav id="sidenav" class="fixed left-0 top-0 h-full z-40 w-[240px] flex flex-col border-r border-outline-variant bg-surface-container-low dark:bg-surface-container-lowest font-body-base text-body-base">
+  <!-- Header -->
+  <div class="p-lg border-b border-outline-variant flex items-center gap-md">
+    <div class="w-10 h-10 bg-surface-container-highest rounded flex items-center justify-center shrink-0 border border-outline-variant overflow-hidden">
+      <img src="./assets/logo.jpg" alt="NoteUnarchive logo" class="w-full h-full object-cover"/>
+    </div>
+    <div>
+      <h1 class="font-headline-md text-headline-md font-bold text-on-surface">NoteUnarchive</h1>
+      <p class="font-mono-label text-mono-label text-on-surface-variant">Local Export Utility</p>
+    </div>
+  </div>
+  <!-- Main Nav -->
+  <div class="flex-1 py-md flex flex-col gap-xs px-sm">
+    <a data-screen="sources" class="nav-link flex items-center gap-sm text-on-surface-variant hover:text-on-surface px-md py-sm rounded hover:bg-surface-container-highest transition-colors duration-150 group" href="#">
+      <span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">database</span>
+      <span>Sources</span>
+    </a>
+    <a data-screen="config" class="nav-link flex items-center gap-sm text-on-surface-variant hover:text-on-surface px-md py-sm rounded hover:bg-surface-container-highest transition-colors duration-150 group" href="#">
+      <span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">settings_input_component</span>
+      <span>Configuration</span>
+    </a>
+    <a data-screen="progress" class="nav-link flex items-center gap-sm text-on-surface-variant hover:text-on-surface px-md py-sm rounded hover:bg-surface-container-highest transition-colors duration-150 group" href="#">
+      <span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">sync</span>
+      <span>Progress</span>
+    </a>
+    <a data-screen="history" class="nav-link flex items-center gap-sm text-on-surface-variant hover:text-on-surface px-md py-sm rounded hover:bg-surface-container-highest transition-colors duration-150 group" href="#">
+      <span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">history</span>
+      <span>History</span>
+    </a>
+  </div>
+  <!-- Footer Nav -->
+  <div class="p-sm border-t border-outline-variant flex flex-col gap-xs">
+    <a data-screen="history" data-scroll-target="settings" class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface px-md py-sm rounded hover:bg-surface-container-highest transition-colors duration-150 group" href="#">
+      <span class="material-symbols-outlined text-[20px]">settings</span>
+      <span>Settings</span>
+    </a>
+    <a data-action="show-help" class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface px-md py-sm rounded hover:bg-surface-container-highest transition-colors duration-150 group" href="#">
+      <span class="material-symbols-outlined text-[20px]">help_outline</span>
+      <span>Help</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SHARED TOP APP BAR
+     ═══════════════════════════════════════════════════════════ -->
+<header class="fixed top-0 left-0 z-30 h-16 w-full flex justify-between items-center pl-[260px] pr-lg border-b border-outline-variant bg-surface dark:bg-surface-dim">
+  <div class="flex items-center gap-xl">
+    <nav class="flex gap-lg h-full items-end pt-2">
+      <a data-screen="sources" class="top-nav-link font-mono-label text-mono-label uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors pb-4" href="#">Sources</a>
+      <a data-screen="config" class="top-nav-link font-mono-label text-mono-label uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors pb-4" href="#">Export Config</a>
+      <a data-screen="progress" class="top-nav-link font-mono-label text-mono-label uppercase tracking-wider text-on-surface-variant hover:text-on-surface transition-colors pb-4" href="#">Status</a>
+    </nav>
+  </div>
+    <div class="flex items-center gap-md">
+    <button data-action="open-github" data-url="https://github.com/xinmengmeng-ai" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-xs font-mono-label text-mono-label uppercase">
+      <span class="material-symbols-outlined text-[18px]">code</span>
+      Github
+    </button>
+    <button data-action="copy-support-qq" data-support-qq="3972679968@qq.com" data-i18n-title="support.qqTitle" title="复制 QQ 客服邮箱：3972679968@qq.com" aria-label="copy support QQ email" class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+      <span class="material-symbols-outlined">support_agent</span>
+    </button>
+    <div class="flex items-center border border-outline-variant rounded overflow-hidden font-mono-label text-mono-label uppercase">
+      <button class="language-toggle px-sm py-xs text-primary bg-surface-container-high" data-language-toggle="zh-CN">中文</button>
+      <button class="language-toggle px-sm py-xs text-on-surface-variant hover:text-on-surface" data-language-toggle="en-US">English</button>
+    </div>
+    <button data-action="refresh-sources" aria-label="refresh" class="text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">refresh</span>
+    </button>
+    <button data-action="show-help" aria-label="info" class="text-on-surface-variant hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">info</span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN: 导出配置 (Export Config)  [id=screen-config]
+     ═══════════════════════════════════════════════════════════ -->
+<div id="screen-config" class="screen ml-[240px] pt-16 h-screen overflow-y-auto bg-background">
+  <div class="max-w-5xl mx-auto p-xl">
+    <!-- Page Header -->
+    <div class="mb-lg flex items-center justify-between">
+      <div>
+        <h2 class="font-display-lg text-display-lg text-on-surface mb-xs flex items-center gap-sm">
+          <span class="material-symbols-outlined text-primary text-[32px]">folder_data</span>
+          Export Config
+        </h2>
+        <p class="font-body-base text-body-base text-on-surface-variant">Configure parsing rules and structural output for selected source.</p>
+      </div>
+      <div class="px-sm py-xs bg-surface-container border border-outline-variant rounded font-mono-label text-mono-label text-on-surface-variant flex items-center gap-xs">
+        <span class="w-2 h-2 rounded-full bg-primary"></span>
+        SOURCE CONNECTED
+      </div>
+    </div>
+    <!-- Bento Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+      <!-- Format Selection -->
+      <section class="lg:col-span-8 bg-surface-container border border-outline-variant rounded-lg p-lg flex flex-col shadow-sm">
+        <div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+          <span class="material-symbols-outlined text-on-surface-variant">code</span>
+          <h3 class="font-headline-md text-headline-md text-on-surface">Data Format</h3>
+        </div>
+        <div class="grid grid-cols-3 gap-sm flex-1">
+          <label class="relative cursor-pointer flex flex-col p-md rounded border bg-secondary-container border-primary ring-1 ring-primary inset-shadow-sm">
+            <input checked class="sr-only" name="format" type="radio" value="markdown"/>
+            <div class="flex justify-between items-start mb-sm">
+              <span class="material-symbols-outlined text-primary">markdown</span>
+              <span data-format-check class="material-symbols-outlined text-primary text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            </div>
+            <span class="font-mono-label text-mono-label text-primary uppercase mb-xs">Markdown</span>
+            <span class="font-body-sm text-body-sm text-on-secondary-container">Preserves formatting for Markdown workflows.</span>
+          </label>
+          <label class="relative cursor-pointer flex flex-col p-md rounded border border-outline-variant bg-surface hover:bg-surface-container-highest transition-colors">
+            <input class="sr-only" name="format" type="radio" value="json"/>
+            <div class="flex justify-between items-start mb-sm">
+              <span class="material-symbols-outlined text-on-surface-variant">data_object</span>
+              <span data-format-check class="material-symbols-outlined text-primary text-[18px] hidden" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            </div>
+            <span class="font-mono-label text-mono-label text-on-surface uppercase mb-xs">JSON Array</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Structured data ideal for programmatic ingestion.</span>
+          </label>
+          <label class="relative cursor-pointer flex flex-col p-md rounded border border-outline-variant bg-surface hover:bg-surface-container-highest transition-colors">
+            <input class="sr-only" name="format" type="radio" value="html"/>
+            <div class="flex justify-between items-start mb-sm">
+              <span class="material-symbols-outlined text-on-surface-variant">html</span>
+              <span data-format-check class="material-symbols-outlined text-primary text-[18px] hidden" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+            </div>
+            <span class="font-mono-label text-mono-label text-on-surface uppercase mb-xs">Static HTML</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Compiled views for browser viewing without client.</span>
+          </label>
+        </div>
+      </section>
+      <!-- Structure Options -->
+      <section class="lg:col-span-4 bg-surface-container border border-outline-variant rounded-lg p-lg flex flex-col shadow-sm">
+        <div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+          <span class="material-symbols-outlined text-on-surface-variant">account_tree</span>
+          <h3 class="font-headline-md text-headline-md text-on-surface">Structure</h3>
+        </div>
+        <div class="flex flex-col gap-md flex-1 justify-center">
+          <div class="flex items-center justify-between">
+            <div class="flex flex-col">
+              <span class="font-body-base text-body-base text-on-surface">Include Attachments</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Images, PDFs, media.</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input checked class="sr-only peer" type="checkbox"/>
+              <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-outline after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pt-sm border-t border-outline-variant">
+            <div class="flex flex-col">
+              <span class="font-body-base text-body-base text-on-surface">Rebuild Folders</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Match source hierarchy.</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input checked class="sr-only peer" type="checkbox"/>
+              <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-outline after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+      </section>
+      <!-- Export Scope -->
+      <section class="lg:col-span-5 bg-surface-container border border-outline-variant rounded-lg p-lg shadow-sm">
+        <div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+          <span class="material-symbols-outlined text-on-surface-variant">account_tree</span>
+          <h3 class="font-headline-md text-headline-md text-on-surface">Export Scope</h3>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Data Source</label>
+          <select data-config-source-select class="w-full bg-surface border border-outline-variant rounded px-sm py-sm font-data-tabular text-data-tabular text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+            <option value="">No sources available</option>
+          </select>
+          <div data-all-documents-label class="rounded border border-primary/30 bg-primary/10 px-sm py-xs text-primary font-body-sm text-body-sm">Export all documents</div>
+          <label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Notebook Folder</label>
+          <div class="relative">
+            <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+            <input data-note-folder-search data-i18n-placeholder="config.notebookSearchPlaceholder" placeholder="Search folders" class="w-full bg-surface border border-outline-variant rounded pl-9 pr-sm py-sm font-data-tabular text-data-tabular text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" type="search"/>
+          </div>
+          <select data-note-folder-select class="w-full bg-surface border border-outline-variant rounded px-sm py-sm font-data-tabular text-data-tabular text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all">
+            <option value="">Export all documents</option>
+          </select>
+          <p class="font-body-sm text-body-sm text-on-surface-variant">Choose a folder to export all notes under it and its subfolders.</p>
+        </div>
+      </section>
+      <!-- Destination Path -->
+      <section class="lg:col-span-7 bg-surface-container border border-outline-variant rounded-lg p-lg shadow-sm">
+        <div class="flex items-center gap-sm mb-md border-b border-outline-variant pb-sm">
+          <span class="material-symbols-outlined text-on-surface-variant">folder_open</span>
+          <h3 class="font-headline-md text-headline-md text-on-surface">Destination Path</h3>
+        </div>
+        <div class="flex flex-col gap-xs">
+          <label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Local Directory</label>
+          <div class="flex gap-sm">
+            <div class="flex-1 relative">
+              <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">terminal</span>
+              <input class="w-full bg-surface border border-outline-variant rounded pl-xl pr-sm py-sm font-data-tabular text-data-tabular text-on-surface focus:border-primary outline-none transition-all cursor-default" readonly type="text" value=""/>
+            </div>
+            <button data-action="browse-destination" class="bg-surface-variant border border-outline-variant text-on-surface hover:bg-surface-bright px-md py-sm rounded font-mono-label text-mono-label uppercase tracking-wider transition-colors flex items-center gap-xs shrink-0">
+              <span class="material-symbols-outlined text-[18px]">search</span>
+              Browse
+            </button>
+          </div>
+          <p data-export-estimate class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Choose a source to estimate required space from the selected scope.</p>
+        </div>
+      </section>
+    </div>
+    <!-- Action Area -->
+    <div class="mt-xl flex justify-end items-center gap-md border-t border-outline-variant pt-lg">
+      <button data-action="cancel-config" class="text-on-surface-variant hover:text-on-surface font-mono-label text-mono-label uppercase px-md py-sm transition-colors">Cancel</button>
+      <button data-action="start-export" data-screen="progress" class="nav-link bg-primary text-on-primary font-mono-label text-mono-label uppercase tracking-wider px-lg py-md rounded hover:brightness-110 transition-all flex items-center gap-sm shadow-[0px_2px_8px_rgba(0,0,0,0.4)]">
+        <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+        Initialize Export
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN: 任务进度 (Progress)  [id=screen-progress]
+     ═══════════════════════════════════════════════════════════ -->
+<div id="screen-progress" class="screen ml-[240px] pt-16 h-screen overflow-y-auto bg-background">
+  <div class="max-w-6xl mx-auto p-xl flex flex-col gap-lg">
+    <!-- Header -->
+    <div class="flex justify-between items-end">
+      <div>
+        <h2 class="font-display-lg text-display-lg text-on-surface mb-xs">Active Operation</h2>
+        <p data-progress-target class="font-mono-label text-mono-label text-on-surface-variant uppercase tracking-wider">Target: -</p>
+      </div>
+      <div class="flex items-center gap-sm font-mono-label text-mono-label">
+        <span data-progress-dot class="inline-block w-2 h-2 rounded-full bg-on-surface-variant"></span>
+        <span data-progress-status class="text-on-surface-variant">IDLE</span>
+      </div>
+    </div>
+    <!-- Bento Grid -->
+    <div class="grid grid-cols-12 gap-gutter">
+      <!-- Main Progress Card -->
+      <div class="col-span-12 md:col-span-8 bg-surface-container-low border border-outline-variant rounded-xl p-lg flex flex-col justify-between min-h-[200px]">
+        <div class="flex justify-between items-start">
+          <div class="flex flex-col">
+            <span class="font-mono-label text-mono-label text-on-surface-variant mb-xs">OVERALL COMPLETION</span>
+            <span data-progress-percent class="font-display-lg text-display-lg text-on-surface" style="font-size: 64px; line-height: 1;">0%</span>
+          </div>
+          <div class="text-right flex flex-col gap-xs">
+            <span class="font-mono-label text-mono-label text-on-surface-variant">EST. TIME REMAINING</span>
+            <span data-progress-eta class="font-data-tabular text-data-tabular text-on-surface text-lg">--:--</span>
+          </div>
+        </div>
+        <div class="mt-xl">
+          <div class="flex justify-between mb-sm font-mono-label text-mono-label">
+            <span data-progress-current class="text-on-surface">Waiting for export</span>
+            <span data-progress-count class="text-on-surface-variant">0 / 0 files</span>
+          </div>
+          <div class="h-unit w-full bg-surface-variant rounded-full overflow-hidden">
+            <div data-progress-bar class="bg-primary h-full rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Controls Card -->
+      <div class="col-span-12 md:col-span-4 bg-surface-container-low border border-outline-variant rounded-xl p-lg flex flex-col justify-center gap-md">
+        <span class="font-mono-label text-mono-label text-on-surface-variant mb-sm">OPERATION CONTROLS</span>
+        <button data-action="pause-export" class="w-full py-md px-lg bg-surface-variant text-on-surface border border-outline rounded flex items-center justify-center gap-sm hover:bg-surface-bright transition-colors font-mono-label text-mono-label uppercase tracking-wide">
+          <span class="material-symbols-outlined">pause</span>
+          Pause Export
+        </button>
+        <button data-action="cancel-export" class="w-full py-md px-lg text-error hover:bg-error-container hover:text-on-error-container rounded flex items-center justify-center gap-sm transition-colors font-mono-label text-mono-label uppercase tracking-wide">
+          <span class="material-symbols-outlined">cancel</span>
+          Cancel Operation
+        </button>
+      </div>
+      <!-- Stats Row -->
+      <div class="col-span-12 md:col-span-4 bg-surface-container-low border border-outline-variant rounded-xl p-md flex items-center gap-md">
+        <div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center text-on-surface-variant border border-outline">
+          <span class="material-symbols-outlined">description</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-mono-label text-mono-label text-on-surface-variant">MARKDOWN NOTES</span>
+          <span data-progress-notes class="font-data-tabular text-data-tabular text-on-surface text-lg">0 / 0</span>
+        </div>
+      </div>
+      <div class="col-span-12 md:col-span-4 bg-surface-container-low border border-outline-variant rounded-xl p-md flex items-center gap-md">
+        <div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center text-on-surface-variant border border-outline">
+          <span class="material-symbols-outlined">attachment</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-mono-label text-mono-label text-on-surface-variant">ATTACHMENTS</span>
+          <span data-progress-attachments class="font-data-tabular text-data-tabular text-on-surface text-lg">0</span>
+        </div>
+      </div>
+      <div class="col-span-12 md:col-span-4 bg-surface-container-low border border-outline-variant rounded-xl p-md flex items-center gap-md">
+        <div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center text-on-surface-variant border border-outline">
+          <span class="material-symbols-outlined">hard_drive_2</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="font-mono-label text-mono-label text-on-surface-variant">DATA WRITTEN</span>
+          <span data-progress-bytes class="font-data-tabular text-data-tabular text-on-surface text-lg">0.0 MB</span>
+        </div>
+      </div>
+      <!-- Terminal Log -->
+      <div class="col-span-12 bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden h-[300px]">
+        <div class="bg-surface-container-low border-b border-outline-variant px-md py-sm flex items-center justify-between">
+          <span class="font-mono-label text-mono-label text-on-surface-variant flex items-center gap-sm">
+            <span class="material-symbols-outlined" style="font-size: 16px;">terminal</span>
+            OUTPUT LOG
+          </span>
+          <div class="flex gap-xs">
+            <span class="w-3 h-3 rounded-full border border-outline-variant"></span>
+            <span class="w-3 h-3 rounded-full border border-outline-variant"></span>
+            <span class="w-3 h-3 rounded-full border border-outline-variant"></span>
+          </div>
+        </div>
+        <div data-progress-log class="p-md font-data-tabular text-data-tabular text-on-surface-variant flex-1 overflow-y-auto flex flex-col gap-xs"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN: 导出历史与设置 (History & Settings)  [id=screen-history]
+     ═══════════════════════════════════════════════════════════ -->
+<div id="screen-history" class="screen ml-[240px] pt-16 h-screen overflow-y-auto bg-background">
+  <div class="max-w-6xl mx-auto p-xl flex flex-col gap-lg">
+    <!-- Header -->
+    <div class="flex justify-between items-end">
+      <div>
+        <h2 class="font-display-lg text-display-lg text-on-surface mb-xs">Export History</h2>
+        <p class="font-body-base text-body-base text-on-surface-variant">Past export operations and application settings.</p>
+      </div>
+      <button data-action="clear-history" class="bg-surface-variant border border-outline-variant text-on-surface hover:bg-surface-bright px-md py-sm rounded font-mono-label text-mono-label uppercase tracking-wider transition-colors flex items-center gap-xs">
+        <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+        Clear History
+      </button>
+    </div>
+    <!-- History List -->
+    <section class="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
+      <div class="flex items-center gap-sm px-lg py-sm border-b border-outline-variant bg-surface-container-low">
+        <span class="material-symbols-outlined text-on-surface-variant text-[18px]">history</span>
+        <h3 class="font-headline-md text-headline-md text-on-surface">Recent Operations</h3>
+      </div>
+      <div class="px-lg py-md text-on-surface-variant font-body-sm text-body-sm">No export history yet.</div>
+    </section>
+    <!-- Settings Section -->
+    <section class="bg-surface-container border border-outline-variant rounded-lg overflow-hidden">
+      <div class="flex items-center gap-sm px-lg py-sm border-b border-outline-variant bg-surface-container-low">
+        <span class="material-symbols-outlined text-on-surface-variant text-[18px]">tune</span>
+        <h3 class="font-headline-md text-headline-md text-on-surface">Application Settings</h3>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-outline-variant">
+        <!-- Left column -->
+        <div class="p-lg flex flex-col gap-md">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-body-base text-body-base text-on-surface">Auto-detect on startup</div>
+              <div class="font-body-sm text-body-sm text-on-surface-variant">Scan for installed note apps when launching.</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input checked class="sr-only peer" type="checkbox"/>
+              <div class="w-11 h-6 bg-surface-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-outline after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          <div class="flex items-center justify-between pt-md border-t border-outline-variant">
+            <div>
+              <div class="font-body-base text-body-base text-on-surface">Verify checksums</div>
+              <div class="font-body-sm text-body-sm text-on-surface-variant">SHA-256 integrity check on exported files.</div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input checked class="sr-only peer" type="checkbox"/>
+              <div class="w-11 h-6 bg-surface-variant rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-outline after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+        <!-- Right column -->
+        <div class="p-lg flex flex-col gap-md">
+          <div class="flex flex-col gap-xs">
+            <label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Default Export Directory</label>
+            <div class="flex gap-sm">
+              <div class="flex-1 relative">
+                <span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">terminal</span>
+                <input class="w-full bg-surface border border-outline-variant rounded pl-xl pr-sm py-sm font-data-tabular text-data-tabular text-on-surface focus:border-primary outline-none transition-all" type="text" value="/Users/admin/Archives"/>
+              </div>
+              <button data-action="browse-default-dir" class="bg-surface-variant border border-outline-variant text-on-surface hover:bg-surface-bright px-md py-sm rounded font-mono-label text-mono-label uppercase tracking-wider transition-colors flex items-center gap-xs shrink-0">
+                <span class="material-symbols-outlined text-[18px]">search</span>
+                Browse
+              </button>
+            </div>
+          </div>
+          <div class="flex flex-col gap-xs pt-md border-t border-outline-variant">
+            <label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Concurrent Threads</label>
+            <div class="flex items-center gap-md">
+              <input class="flex-1 h-1 bg-surface-variant rounded-full appearance-none accent-primary" max="8" min="1" type="range" value="4"/>
+              <span class="font-data-tabular text-data-tabular text-on-surface w-6 text-center">4</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-xs pt-md border-t border-outline-variant">
+            <label class="font-mono-label text-mono-label text-on-surface-variant uppercase">Interface Language</label>
+            <div data-current-language class="font-body-base text-body-base text-on-surface">中文</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN: 数据源选择 (Sources)  [id=screen-sources]
+     ═══════════════════════════════════════════════════════════ -->
+<div id="screen-sources" class="screen ml-[240px] pt-16 h-screen overflow-y-auto bg-background">
+  <div class="p-xl flex-1 flex flex-col max-w-7xl w-full mx-auto">
+    <!-- Page Header -->
+    <div class="flex justify-between items-end mb-lg">
+      <div>
+        <h2 class="font-display-lg text-display-lg text-on-surface mb-xs">Data Sources</h2>
+        <p class="font-body-base text-body-base text-on-surface-variant max-w-2xl">Detecting local installations and data directories for supported knowledge base applications.</p>
+      </div>
+      <button data-action="custom-path" class="bg-surface-variant border border-outline-variant text-on-surface hover:bg-surface-container-highest transition-colors duration-150 px-md py-sm rounded flex items-center gap-sm font-mono-label text-mono-label uppercase tracking-wider h-fit">
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        Custom Path
+      </button>
+    </div>
+    <!-- Source Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-md">
+      <div class="col-span-full px-lg py-md bg-surface-container-low border border-outline-variant rounded text-on-surface-variant font-body-sm text-body-sm">Supported sources will appear here.</div>
+    </div>
+  </div>
+</div>
+
+<script src="./i18n.js"></script>
+<script id="app-i18n">
+(function () {
+  const i18n = window.NoteUnarchiveI18n.createI18n('zh-CN');
+  const staticBindings = [
+    ['#sidenav p', 'app.subtitle'],
+    ['#sidenav [data-screen="sources"] span:last-child', 'nav.sources'],
+    ['#sidenav [data-screen="config"] span:last-child', 'nav.config'],
+    ['#sidenav [data-screen="progress"] span:last-child', 'nav.progress'],
+    ['#sidenav [data-screen="history"] span:last-child', 'nav.history'],
+    ['#sidenav .p-sm a:first-child span:last-child', 'nav.settings'],
+    ['#sidenav .p-sm a:nth-child(2) span:last-child', 'nav.help'],
+    ['header [data-screen="sources"]', 'nav.sources'],
+    ['header [data-screen="config"]', 'nav.config'],
+    ['header [data-screen="progress"]', 'nav.progress'],
+    ['#screen-sources h2', 'sources.heading'],
+    ['#screen-sources h2 + p', 'sources.description'],
+    ['#screen-sources .grid > div:first-child', 'sources.placeholder'],
+    ['#screen-config h2', 'config.heading'],
+    ['#screen-config h2 + p', 'config.description'],
+    ['#screen-config .mb-lg .px-sm.py-xs', 'config.sourceConnected'],
+    ['#screen-config section:nth-of-type(1) h3', 'config.format'],
+    ['#screen-config section:nth-of-type(2) h3', 'config.structure'],
+    ['#screen-config section:nth-of-type(3) h3', 'config.scope'],
+    ['#screen-config section:nth-of-type(4) h3', 'config.destinationPath'],
+    ['#screen-config button:not([data-screen])', 'config.browse'],
+    ['#screen-config .flex.justify-end.items-center button:first-child', 'config.cancel'],
+    ['#screen-config button[data-screen="progress"]', 'config.start'],
+    ['#screen-progress h2', 'progress.heading'],
+    ['#screen-progress button:first-of-type', 'progress.pause'],
+    ['#screen-progress button:nth-of-type(2)', 'progress.cancel'],
+    ['#screen-progress .border-b span.flex', 'progress.outputLog'],
+    ['#screen-history h2', 'history.heading'],
+    ['#screen-history h2 + p', 'history.description'],
+    ['#screen-history .flex.justify-between.items-end > button', 'history.clear'],
+    ['#screen-history section:first-of-type h3', 'history.recent'],
+    ['#screen-history section:last-of-type h3', 'settings.heading'],
+    ['#screen-history section:last-of-type button', 'config.browse'],
+    ['#screen-sources .flex.justify-between.items-end button', 'sources.customPath'],
+    ['#screen-sources .grid [data-screen="config"]', 'sources.configure'],
+  ];
+
+  const textContainsBindings = [
+    ['#screen-config', 'SOURCE CONNECTED', 'config.sourceConnected'],
+    ['#screen-config', 'Preserves formatting for Markdown workflows.', 'config.markdownDesc'],
+    ['#screen-config', 'JSON Array', 'config.jsonArray'],
+    ['#screen-config', 'Structured data ideal for programmatic ingestion.', 'config.jsonDesc'],
+    ['#screen-config', 'Static HTML', 'config.staticHtml'],
+    ['#screen-config', 'Compiled views for browser viewing without client.', 'config.htmlDesc'],
+    ['#screen-config', 'Include Attachments', 'config.includeAttachments'],
+    ['#screen-config', 'Images, PDFs, media.', 'config.includeAttachmentsHelp'],
+    ['#screen-config', 'Rebuild Folders', 'config.rebuildHierarchy'],
+    ['#screen-config', 'Match source hierarchy.', 'config.rebuildHierarchyHelp'],
+    ['#screen-config', 'Data Source', 'config.source'],
+    ['#screen-config', 'Notebook Folder', 'config.notebookScope'],
+    ['#screen-config', 'No sources available', 'config.noSources'],
+    ['#screen-config', 'Export all documents', 'config.allNotebooks'],
+    ['#screen-config', 'Choose a folder to export all notes under it and its subfolders.', 'config.notebookScopeHelp'],
+    ['#screen-config', 'Local Directory', 'config.localDirectory'],
+    ['#screen-progress', 'IDLE', 'status.IDLE'],
+    ['#screen-progress', 'OVERALL COMPLETION', 'progress.overallCompletion'],
+    ['#screen-progress', 'EST. TIME REMAINING', 'progress.eta'],
+    ['#screen-progress', 'Waiting for export', 'progress.waiting'],
+    ['#screen-progress', '0 / 0 files', 'progress.zeroFiles'],
+    ['#screen-progress', 'OPERATION CONTROLS', 'progress.controls'],
+    ['#screen-progress', 'Pause Export', 'progress.pause'],
+    ['#screen-progress', 'Cancel Operation', 'progress.cancel'],
+    ['#screen-progress', 'MARKDOWN NOTES', 'progress.markdownNotes'],
+    ['#screen-progress', 'ATTACHMENTS', 'progress.attachments'],
+    ['#screen-progress', 'DATA WRITTEN', 'progress.dataWritten'],
+    ['#screen-progress', 'OUTPUT LOG', 'progress.outputLog'],
+    ['#screen-history', 'Interrupted by user', 'history.interruptedByUser'],
+    ['#screen-history', 'COMPLETED', 'status.COMPLETED'],
+    ['#screen-history', 'CANCELLED', 'status.CANCELLED'],
+    ['#screen-history', 'Auto-detect on startup', 'settings.autoDetect'],
+    ['#screen-history', 'Scan for installed note apps when launching.', 'settings.autoDetectHelp'],
+    ['#screen-history', 'Verify checksums', 'settings.sha256'],
+    ['#screen-history', 'SHA-256 integrity check on exported files.', 'settings.sha256Help'],
+    ['#screen-history', 'Default Export Directory', 'settings.defaultDir'],
+    ['#screen-history', 'Concurrent Threads', 'settings.threads'],
+    ['#screen-history', 'Interface Language', 'settings.language'],
+    ['#screen-sources', 'Custom Path', 'sources.customPath'],
+    ['#screen-sources', 'Manual Path Required', 'sources.manual'],
+    ['#screen-sources', 'Configure Export', 'sources.configure'],
+    ['#screen-sources', 'Unable to locate standard SQLite directory', 'sources.unableLocate'],
+    ['#screen-sources', 'Locate', 'sources.locate'],
+    ['#screen-sources', 'YoudaoNote - Local SQLite', 'sources.youdaoLocal'],
+    ['#screen-sources', 'YoudaoNote — Local SQLite', 'sources.youdaoLocalDash'],
+  ];
+
+  function directText(node) {
+    return Array.from(node.childNodes)
+      .filter((child) => child.nodeType === Node.TEXT_NODE)
+      .map((child) => child.textContent.trim())
+      .filter(Boolean)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function bindStaticNodes() {
+    for (const [selector, key] of staticBindings) {
+      document.querySelectorAll(selector).forEach((node) => {
+        node.dataset.i18n = key;
+      });
+    }
+    for (const [rootSelector, text, key] of textContainsBindings) {
+      document.querySelectorAll(rootSelector + ' *').forEach((node) => {
+        if (node.textContent.trim() === text || directText(node) === text) node.dataset.i18n = key;
+      });
+    }
+  }
+
+  function activeScreen() {
+    return document.querySelector('.screen.active')?.id?.replace('screen-', '') || 'config';
+  }
+
+  function updateLanguageButtons(language) {
+    document.querySelectorAll('[data-language-toggle]').forEach((button) => {
+      const active = button.dataset.languageToggle === language;
+      button.classList.toggle('text-primary', active);
+      button.classList.toggle('bg-surface-container-high', active);
+      button.classList.toggle('text-on-surface-variant', !active);
+    });
+    const current = document.querySelector('[data-current-language]');
+    if (current) current.textContent = i18n.t('settings.currentLanguage.' + language);
+  }
+
+  function setNodeText(node, text) {
+    if (node.querySelector('.material-symbols-outlined')) {
+      const icon = node.querySelector('.material-symbols-outlined');
+      Array.from(node.childNodes).forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE) child.remove();
+      });
+      if (icon) icon.insertAdjacentText('afterend', ' ' + text);
+      return;
+    }
+    if (node.children.length) {
+      const textNode = Array.from(node.childNodes).find((child) => {
+        return child.nodeType === Node.TEXT_NODE && child.textContent.trim();
+      });
+      if (textNode) {
+        textNode.textContent = ' ' + text;
+        return;
+      }
+    }
+    node.textContent = text;
+  }
+
+  function applyLanguage(language) {
+    const actualLanguage = i18n.setLanguage(language || i18n.getLanguage());
+    document.documentElement.lang = actualLanguage === 'zh-CN' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach((node) => {
+      setNodeText(node, i18n.t(node.dataset.i18n));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach((node) => {
+      node.title = i18n.t(node.dataset.i18nTitle);
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+      node.placeholder = i18n.t(node.dataset.i18nPlaceholder);
+    });
+    const pausedButton = document.querySelector('#screen-progress button:first-of-type[data-paused="true"]');
+    if (pausedButton) setNodeText(pausedButton, i18n.t('progress.resume'));
+    document.title = i18n.t('title.' + activeScreen());
+    updateLanguageButtons(actualLanguage);
+    window.noteUnarchiveState?.refreshSources?.();
+    window.noteUnarchiveState?.refreshHistory?.();
+    window._updateExportEstimate?.();
+  }
+
+  async function setLanguage(language) {
+    applyLanguage(language);
+    if (window.api) await window.api.setSettings({ language: i18n.getLanguage() });
+  }
+
+  document.addEventListener('click', (event) => {
+    const toggle = event.target.closest('[data-language-toggle]');
+    if (toggle) setLanguage(toggle.dataset.languageToggle);
+  });
+
+  window.noteUnarchiveI18n = {
+    t: i18n.t,
+    getLanguage: i18n.getLanguage,
+    setLanguage,
+    applyLanguage,
+  };
+
+  bindStaticNodes();
+  if (window.api) {
+    window.api.getSettings().then((settings) => applyLanguage(settings.language || 'zh-CN'));
+  } else {
+    applyLanguage('zh-CN');
+  }
+})();
+</script>
+
+<script id="app-logic-ui">
+(function () {
+  let toastTimer = null;
+
+  function t(key, params) {
+    return window.noteUnarchiveI18n?.t(key, params) || key;
+  }
+
+  function showToast(message) {
+    let toast = document.getElementById('app-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'app-toast';
+      toast.className = 'fixed right-lg bottom-lg z-50 max-w-sm bg-surface-container-high border border-outline-variant text-on-surface px-md py-sm rounded shadow-lg font-body-sm text-body-sm transition-opacity';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.style.opacity = '0';
+    }, 2600);
+  }
+
+  document.addEventListener('click', (event) => {
+    const help = event.target.closest('[data-action="show-help"]');
+    if (help) {
+      event.preventDefault();
+      showToast(t('toast.help'));
+      return;
+    }
+
+    const github = event.target.closest('[data-action="open-github"]');
+    if (github) {
+      event.preventDefault();
+      if (window.api?.openExternal) window.api.openExternal(github.dataset.url || 'https://github.com/xinmengmeng-ai');
+      else showToast(t('toast.noApi'));
+      return;
+    }
+
+    const support = event.target.closest('[data-action="copy-support-qq"]');
+    if (!support) return;
+    event.preventDefault();
+    const qq = support.dataset.supportQq || '3972679968@qq.com';
+    if (window.api?.copyText) {
+      window.api.copyText(qq)
+        .then(() => showToast(t('toast.supportCopied', { qq })))
+        .catch((error) => showToast(t('toast.supportCopyFailed', { message: error?.message || String(error) })));
+    } else {
+      showToast(t('toast.noApi'));
+    }
+  });
+
+  window.noteUnarchiveUi = { showToast };
+})();
+</script>
+
+<script id="app-logic-sources">
+(function () {
+  const state = {
+    sources: [],
+    selectedSource: null,
+  };
+  window.noteUnarchiveState = state;
+
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function sourceIcon(source) {
+    return source.source === 'youdao' ? 'cloud_done' : 'sticky_note_2';
+  }
+
+  function sourceTitle(source) {
+    return source.source === 'youdao' ? '有道云笔记' : (source.name || 'Notes');
+  }
+
+  function sameSource(left = {}, right = {}) {
+    return ['source', 'account', 'dbPath', 'dataDir', 'fileDir'].every((key) => String(left[key] || '') === String(right[key] || ''));
+  }
+
+  function t(key, params) {
+    return window.noteUnarchiveI18n?.t(key, params) || key;
+  }
+
+  function showToast(key) {
+    window.noteUnarchiveUi?.showToast(t(key));
+  }
+
+  function sourcePath(source) {
+    if (source.dbPath) return source.dbPath;
+    if (source.dataDir) return source.dataDir;
+    return t('sources.manualPath');
+  }
+
+  function sourceCard(source, index) {
+    const detected = source.status === 'detected';
+    const statusClass = detected ? 'border-primary/30 text-primary' : 'border-tertiary/30 text-tertiary';
+    const dotClass = detected ? 'bg-primary' : 'bg-tertiary';
+    const statusText = detected ? t('sources.detected') : t('sources.manual');
+    return `
+      <div class="bg-surface-container-low border border-outline-variant rounded p-md hover:bg-surface-container transition-colors duration-150 group" data-source-card="${index}">
+        <div class="flex justify-between items-start mb-lg">
+          <div class="flex items-center gap-md">
+            <div class="w-10 h-10 bg-surface-container-highest border border-outline-variant rounded flex items-center justify-center text-on-surface">
+              <span class="material-symbols-outlined">${sourceIcon(source)}</span>
+            </div>
+            <div>
+              <h3 class="font-body-base text-body-base font-semibold text-on-surface">${sourceTitle(source)}</h3>
+              <p class="font-data-tabular text-data-tabular text-on-surface-variant mt-1">${escapeHtml(source.account || source.name || '')}</p>
+            </div>
+          </div>
+          <div class="bg-surface-container-lowest border ${statusClass} font-mono-label text-mono-label px-2 py-1 rounded flex items-center gap-xs">
+            <div class="w-2 h-2 rounded-full ${dotClass}"></div>
+            ${statusText}
+          </div>
+        </div>
+        <div class="bg-surface-container-lowest border border-outline-variant/50 p-sm rounded font-data-tabular text-data-tabular text-on-surface-variant flex items-center gap-sm">
+          <span class="material-symbols-outlined text-[16px]">folder</span>
+          <span class="truncate">${escapeHtml(sourcePath(source))}</span>
+        </div>
+        <div class="mt-md flex justify-end gap-sm">
+          ${detected ? '' : '<button data-action="locate-source" class="btn-source-locate text-primary hover:text-primary-fixed-dim font-mono-label uppercase tracking-wider transition-colors">' + t('sources.locate') + '</button>'}
+          <button data-screen="config" class="btn-source-config nav-link bg-primary text-on-primary font-mono-label text-mono-label uppercase tracking-wider px-md py-sm rounded hover:brightness-110 transition-all flex items-center gap-xs">
+            <span class="material-symbols-outlined text-[16px]">settings_input_component</span>
+            ${t('sources.configure')}
+          </button>
+        </div>
+      </div>`;
+  }
+
+  function fallbackSources() {
+    return [
+      { source: 'youdao', name: 'YoudaoNote', account: 'YoudaoNote', status: 'manual' },
+    ];
+  }
+
+  async function loadSources() {
+    const grid = document.querySelector('#screen-sources .grid');
+    if (!grid || !window.api) return;
+    let sources = [];
+    try {
+      sources = await window.api.detectSources();
+    } catch {
+      sources = [];
+    }
+    state.sources = sources.length ? sources : fallbackSources();
+    if (!state.selectedSource || !state.sources.some((source) => sameSource(source, state.selectedSource))) {
+      state.selectedSource = state.sources[0] || null;
+    }
+    grid.innerHTML = state.sources.map(sourceCard).join('');
+    window._renderConfigSourceOptions?.();
+    window._loadNotebookTree?.();
+    window._updateExportEstimate?.();
+  }
+
+  async function reloadSources() {
+    if (!window.api) {
+      showToast('toast.noApi');
+      return;
+    }
+    await loadSources();
+    showToast('toast.sourcesRefreshed');
+  }
+
+  async function addCustomSource() {
+    if (!window.api) {
+      showToast('toast.noApi');
+      return;
+    }
+    const dir = await window.api.browseSource();
+    if (!dir) return;
+    const account = dir.split(/[\\/]/).filter(Boolean).pop() || 'Custom Path';
+    const source = {
+      source: 'youdao',
+      name: 'Custom Path',
+      account,
+      status: 'detected',
+      dataDir: dir,
+    };
+    state.sources = [source, ...state.sources.filter((item) => item.dataDir !== dir)];
+    state.selectedSource = source;
+    state.refreshSources();
+    window._renderConfigSourceOptions?.();
+    window._loadNotebookTree?.();
+    window._updateExportEstimate?.();
+    showToast('toast.customPathAdded');
+  }
+
+  state.refreshSources = () => {
+    const grid = document.querySelector('#screen-sources .grid');
+    if (grid && state.sources.length) grid.innerHTML = state.sources.map(sourceCard).join('');
+    window._renderConfigSourceOptions?.();
+  };
+  state.reloadSources = reloadSources;
+  state.addCustomSource = addCustomSource;
+
+  document.addEventListener('click', async (event) => {
+    if (event.target.closest('[data-action="refresh-sources"]')) {
+      event.preventDefault();
+      await reloadSources();
+      return;
+    }
+
+    if (event.target.closest('[data-action="custom-path"]')) {
+      event.preventDefault();
+      await addCustomSource();
+      return;
+    }
+
+    const card = event.target.closest('[data-source-card]');
+    if (!card) return;
+    const source = state.sources[Number(card.dataset.sourceCard)];
+    if (!source) return;
+
+    if (event.target.closest('.btn-source-locate')) {
+      const dir = await window.api.browseSource();
+      if (dir) {
+        source.dataDir = dir;
+        source.status = 'detected';
+        state.selectedSource = source;
+        state.refreshSources();
+        window._loadNotebookTree?.();
+        window._updateExportEstimate?.();
+      }
+      return;
+    }
+
+    if (event.target.closest('.btn-source-config')) {
+      state.selectedSource = source;
+      window._renderConfigSourceOptions?.();
+      window._loadNotebookTree?.();
+    }
+  });
+
+  loadSources();
+})();
+</script>
+
+<script id="app-logic-config">
+(function () {
+  const selectedClasses = ['bg-secondary-container', 'border-primary', 'ring-1', 'ring-primary', 'inset-shadow-sm'];
+  const unselectedClasses = ['border-outline-variant', 'bg-surface', 'hover:bg-surface-container-highest'];
+  const notebookTreeCache = {
+    key: '',
+    rows: [],
+  };
+
+  function t(key, params) {
+    return window.noteUnarchiveI18n?.t(key, params) || key;
+  }
+
+  function showToast(message) {
+    window.noteUnarchiveUi?.showToast(message);
+  }
+
+  function checkedValue(selector, fallback) {
+    const checked = document.querySelector(selector + ':checked');
+    return checked ? checked.value : fallback;
+  }
+
+  function sourceLabel(source = {}) {
+    const name = source.source === 'youdao' ? '有道云笔记' : source.name || source.source || 'Source';
+    return [name, source.account].filter(Boolean).join(' - ');
+  }
+
+  function sameSource(left = {}, right = {}) {
+    return ['source', 'account', 'dbPath', 'dataDir', 'fileDir'].every((key) => String(left[key] || '') === String(right[key] || ''));
+  }
+
+  function setSelectedSource(source) {
+    if (!window.noteUnarchiveState) return null;
+    window.noteUnarchiveState.selectedSource = source || window.noteUnarchiveState.sources?.[0] || null;
+    notebookTreeCache.key = '';
+    notebookTreeCache.rows = [];
+    return window.noteUnarchiveState.selectedSource;
+  }
+
+  function selectedSourceIndex() {
+    const sources = window.noteUnarchiveState?.sources || [];
+    const selected = window.noteUnarchiveState?.selectedSource || sources[0] || {};
+    const index = sources.findIndex((source) => sameSource(source, selected));
+    return index >= 0 ? index : sources.length ? 0 : -1;
+  }
+
+  function getSelectedSource() {
+    const sources = window.noteUnarchiveState?.sources || [];
+    const { sourceSelect } = configInputs();
+    const index = Number(sourceSelect?.value ?? selectedSourceIndex());
+    return sources[index] || window.noteUnarchiveState?.selectedSource || sources[0] || {};
+  }
+
+  function renderConfigSourceOptions() {
+    const { sourceSelect } = configInputs();
+    if (!sourceSelect) return;
+    const sources = window.noteUnarchiveState?.sources || [];
+    sourceSelect.innerHTML = '';
+    if (!sources.length) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = t('config.noSources');
+      sourceSelect.appendChild(option);
+      return;
+    }
+    sources.forEach((source, index) => {
+      const option = document.createElement('option');
+      option.value = String(index);
+      option.textContent = sourceLabel(source);
+      sourceSelect.appendChild(option);
+    });
+    const index = selectedSourceIndex();
+    sourceSelect.value = String(index >= 0 ? index : 0);
+    setSelectedSource(sources[Number(sourceSelect.value)] || sources[0]);
+  }
+
+  function setActiveFormat(format) {
+    const input = document.querySelector(`#screen-config input[name="format"][value="${format || 'markdown'}"]`);
+    if (input) input.checked = true;
+    updateFormatCards();
+  }
+
+  function updateFormatCards() {
+    document.querySelectorAll('#screen-config input[name="format"]').forEach((input) => {
+      const label = input.closest('label');
+      if (!label) return;
+      const checkIcon = label.querySelector('[data-format-check]');
+      if (checkIcon) checkIcon.classList.toggle('hidden', !input.checked);
+      selectedClasses.forEach((name) => label.classList.toggle(name, input.checked));
+      unselectedClasses.forEach((name) => label.classList.toggle(name, !input.checked));
+      label.querySelectorAll('.font-mono-label, .material-symbols-outlined').forEach((node) => {
+        if (node.matches('[data-format-check]')) return;
+        node.classList.toggle('text-primary', input.checked);
+        node.classList.toggle('text-on-surface', !input.checked && node.classList.contains('font-mono-label'));
+        node.classList.toggle('text-on-surface-variant', !input.checked && node.classList.contains('material-symbols-outlined'));
+      });
+    });
+  }
+
+  function configInputs() {
+    const screen = document.getElementById('screen-config');
+    const checkboxes = screen.querySelectorAll('input[type="checkbox"]');
+    const sourceSelect = screen.querySelector('[data-config-source-select]');
+    const notebookSearch = screen.querySelector('[data-note-folder-search]');
+    const notebookSelect = screen.querySelector('[data-note-folder-select]');
+    const destinationInput = screen.querySelector('section:nth-of-type(4) input[type="text"]');
+    return {
+      includeAttachments: checkboxes[0]?.checked !== false,
+      rebuildHierarchy: checkboxes[1]?.checked !== false,
+      notebookPath: notebookSelect?.value || '',
+      destinationDir: destinationInput?.value || '',
+      destinationInput,
+      sourceSelect,
+      notebookSearch,
+      notebookSelect,
+    };
+  }
+
+  function isValidDateInput(value) {
+    if (!value) return true;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    return !Number.isNaN(new Date(`${value}T00:00:00`).getTime());
+  }
+
+  function validateExportConfig(config) {
+    if (!config.dataDir && !config.dbPath && !config.enexFiles) return t('toast.selectSourceDir');
+    if (!config.destinationDir) return t('toast.selectDestinationDir');
+    return null;
+  }
+
+  function formatBytes(bytes) {
+    const value = Number(bytes || 0);
+    if (value >= 1024 * 1024 * 1024) return (value / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    if (value >= 1024 * 1024) return (value / (1024 * 1024)).toFixed(1) + ' MB';
+    if (value >= 1024) return (value / 1024).toFixed(1) + ' KB';
+    return value + ' B';
+  }
+
+  function setEstimateText(key, params) {
+    const estimate = document.querySelector('[data-export-estimate]');
+    if (estimate) estimate.textContent = t(key, params);
+  }
+
+  let estimateTimer = null;
+  let estimateRequestId = 0;
+
+  function flattenNotebookTree(nodes, depth = 0, rows = []) {
+    for (const node of nodes || []) {
+      rows.push({ path: node.path, label: `${'  '.repeat(depth)}${node.title} (${node.noteCount || 0})` });
+      flattenNotebookTree(node.children || [], depth + 1, rows);
+    }
+    return rows;
+  }
+
+  function sourceTreeKey(source = {}) {
+    return [source.source, source.account, source.dbPath, source.dataDir, source.fileDir].filter(Boolean).join('|');
+  }
+
+  function filterNotebookTree(rows, query) {
+    const keyword = String(query || '').trim().toLowerCase();
+    if (!keyword) return rows;
+    return rows.filter((row) => {
+      return String(row.path || '').toLowerCase().includes(keyword) || String(row.label || '').toLowerCase().includes(keyword);
+    });
+  }
+
+  function renderNotebookOptions(rows = notebookTreeCache.rows) {
+    const { notebookSelect, notebookSearch } = configInputs();
+    if (!notebookSelect) return;
+    const previous = notebookSelect.value;
+    notebookSelect.innerHTML = `<option value="">${t('config.allNotebooks')}</option>`;
+    for (const row of filterNotebookTree(rows, notebookSearch?.value)) {
+      const option = document.createElement('option');
+      option.value = row.path;
+      option.textContent = row.label;
+      notebookSelect.appendChild(option);
+    }
+    if ([...notebookSelect.options].some((option) => option.value === previous)) notebookSelect.value = previous;
+  }
+
+  async function loadNotebookTree() {
+    const selected = getSelectedSource();
+    const cacheKey = sourceTreeKey(selected);
+    notebookTreeCache.key = cacheKey;
+    notebookTreeCache.rows = [];
+    renderNotebookOptions();
+    if (!window.api?.listSourceTree || (!selected.dbPath && !selected.dataDir && !selected.enexFiles)) return;
+    try {
+      const tree = await window.api.listSourceTree(selected);
+      notebookTreeCache.key = cacheKey;
+      notebookTreeCache.rows = flattenNotebookTree(tree);
+      renderNotebookOptions();
+    } catch {
+      // Leave the all-folders option available when a source cannot expose folders.
+    }
+  }
+
+  async function ensureNotebookTree() {
+    const selected = getSelectedSource();
+    const cacheKey = sourceTreeKey(selected);
+    if (notebookTreeCache.key === cacheKey && notebookTreeCache.rows.length) {
+      renderNotebookOptions();
+      return;
+    }
+    await loadNotebookTree();
+  }
+
+  async function updateExportEstimate() {
+    const selected = window.noteUnarchiveState?.selectedSource || window.noteUnarchiveState?.sources?.[0] || {};
+    if (!window.api?.estimateExport || (!selected.dataDir && !selected.dbPath && !selected.enexFiles)) {
+      setEstimateText('config.diskSpaceEstimatePending');
+      return;
+    }
+
+    const fields = configInputs();
+    const config = Object.assign({}, selected, {
+      source: selected.source || 'youdao',
+      format: checkedValue('#screen-config input[name="format"]', 'markdown'),
+      includeAttachments: fields.includeAttachments,
+      rebuildHierarchy: fields.rebuildHierarchy,
+      notebookPath: fields.notebookPath,
+      destinationDir: fields.destinationDir,
+    });
+
+    const requestId = ++estimateRequestId;
+    setEstimateText('config.diskSpaceEstimateLoading');
+    try {
+      const result = await window.api.estimateExport(config);
+      if (requestId !== estimateRequestId) return;
+      const key = config.includeAttachments === false ? 'config.diskSpaceEstimateNoAttachments' : 'config.diskSpaceEstimateReady';
+      setEstimateText(key, {
+        notes: result.noteCount || 0,
+        attachments: result.attachmentCount || 0,
+        size: formatBytes(result.totalBytes || 0),
+      });
+    } catch (error) {
+      if (requestId !== estimateRequestId) return;
+      setEstimateText('config.diskSpaceEstimateFailed', { message: error?.message || String(error) });
+    }
+  }
+
+  function scheduleExportEstimate() {
+    clearTimeout(estimateTimer);
+    estimateTimer = setTimeout(updateExportEstimate, 120);
+  }
+
+  function applyExportConfig(config = {}) {
+    const fields = configInputs();
+    setActiveFormat(config.format || 'markdown');
+    const sources = window.noteUnarchiveState?.sources || [];
+    const index = sources.findIndex((source) => sameSource(source, config));
+    if (index >= 0) {
+      setSelectedSource(sources[index]);
+      if (fields.sourceSelect) fields.sourceSelect.value = String(index);
+    }
+    const checkboxes = document.querySelectorAll('#screen-config input[type="checkbox"]');
+    if (checkboxes[0]) checkboxes[0].checked = config.includeAttachments !== false;
+    if (checkboxes[1]) checkboxes[1].checked = config.rebuildHierarchy !== false;
+    if (fields.notebookSelect) fields.notebookSelect.value = config.notebookPath || '';
+    if (fields.destinationInput) fields.destinationInput.value = config.destinationDir || fields.destinationInput.value || '';
+    ensureNotebookTree().then(() => {
+      const nextFields = configInputs();
+      if (nextFields.notebookSelect) nextFields.notebookSelect.value = config.notebookPath || '';
+    });
+    scheduleExportEstimate();
+  }
+
+  async function loadConfigDefaults() {
+    if (!window.api) return;
+    const settings = await window.api.getSettings();
+    const { destinationInput } = configInputs();
+    if (destinationInput && settings.defaultExportDir) destinationInput.value = settings.defaultExportDir;
+    scheduleExportEstimate();
+  }
+
+  document.addEventListener('click', async (event) => {
+    const screen = document.getElementById('screen-config');
+    if (!screen) return;
+
+    const cancelButton = event.target.closest('#screen-config .flex.justify-end.items-center button:first-child');
+    if (cancelButton && !cancelButton.dataset.screen) {
+      event.preventDefault();
+      document.querySelector('[data-screen="sources"]')?.click();
+      return;
+    }
+
+    const browseButton = event.target.closest('#screen-config section:nth-of-type(4) button:not([data-screen])');
+    if (browseButton) {
+      event.preventDefault();
+      if (!window.api) {
+        showToast(t('toast.noApi'));
+        return;
+      }
+      const dir = await window.api.browseSource();
+      const { destinationInput } = configInputs();
+      if (dir && destinationInput) destinationInput.value = dir;
+      scheduleExportEstimate();
+      return;
+    }
+
+    const startButton = event.target.closest('#screen-config button[data-screen="progress"]');
+    if (!startButton) return;
+    if (!window.api) {
+      showToast(t('toast.noApi'));
+      return;
+    }
+
+    const selected = getSelectedSource();
+    const fields = configInputs();
+    const config = Object.assign({}, selected, {
+      source: selected.source || 'youdao',
+      format: checkedValue('#screen-config input[name="format"]', 'markdown'),
+      includeAttachments: fields.includeAttachments,
+      rebuildHierarchy: fields.rebuildHierarchy,
+      notebookPath: fields.notebookPath,
+      incremental: true,
+      destinationDir: fields.destinationDir,
+    });
+    const validationError = validateExportConfig(config);
+    if (validationError) {
+      showToast(validationError);
+      event.stopImmediatePropagation();
+      return;
+    }
+
+    window.noteUnarchiveState.currentExportConfig = config;
+    window._resetProgressUI?.();
+    try {
+      window._setRunningState?.(true);
+      await window.api.startExport(config);
+      showToast(t('toast.exportStarted'));
+    } catch (error) {
+      window._setRunningState?.(false);
+      const message = error?.message || String(error);
+      window._appendLog?.({ timestamp: new Date().toISOString(), message, status: 'ERROR' });
+      showToast(t('toast.exportFailed', { message }));
+    }
+  });
+
+  document.addEventListener('change', (event) => {
+    if (event.target.matches('#screen-config input[name="format"]')) {
+      updateFormatCards();
+      scheduleExportEstimate();
+    }
+    if (event.target.matches('#screen-config [data-config-source-select]')) {
+      const sources = window.noteUnarchiveState?.sources || [];
+      setSelectedSource(sources[Number(event.target.value)] || sources[0]);
+      loadNotebookTree();
+      scheduleExportEstimate();
+    }
+    if (event.target.matches('#screen-config input[type="checkbox"], #screen-config [data-note-folder-select]')) scheduleExportEstimate();
+  });
+
+  document.addEventListener('input', (event) => {
+    if (!event.target.matches('#screen-config [data-note-folder-search]')) return;
+    renderNotebookOptions();
+  });
+
+  window._applyExportConfig = applyExportConfig;
+  window._validateExportConfig = validateExportConfig;
+  window._setActiveFormat = setActiveFormat;
+  window._updateExportEstimate = updateExportEstimate;
+  window._renderConfigSourceOptions = renderConfigSourceOptions;
+  window._loadNotebookTree = loadNotebookTree;
+  window._ensureNotebookTree = ensureNotebookTree;
+  updateFormatCards();
+  renderConfigSourceOptions();
+  loadConfigDefaults();
+  ensureNotebookTree();
+  scheduleExportEstimate();
+})();
+</script>
+
+<script id="app-logic-progress">
+(function () {
+  let exportStartTime = 0;
+  let exportRunning = false;
+
+  function t(key, params) {
+    return window.noteUnarchiveI18n?.t(key, params) || key;
+  }
+
+  function showToast(message) {
+    window.noteUnarchiveUi?.showToast(message);
+  }
+
+      const progressButtons = document.querySelectorAll('#screen-progress button');
+      const pauseButton = progressButtons[0];
+      const cancelButton = progressButtons[1];
+
+      function updateProgressControls() {
+        if (pauseButton) {
+          pauseButton.disabled = !exportRunning;
+          pauseButton.classList.toggle('opacity-50', !exportRunning);
+          pauseButton.classList.toggle('cursor-not-allowed', !exportRunning);
+        }
+        if (cancelButton) {
+          cancelButton.disabled = !exportRunning;
+          cancelButton.classList.toggle('opacity-50', !exportRunning);
+          cancelButton.classList.toggle('cursor-not-allowed', !exportRunning);
+        }
+      }
+
+      function setRunningState(running) {
+        exportRunning = Boolean(running);
+        if (window.noteUnarchiveState) window.noteUnarchiveState.exportRunning = exportRunning;
+        const status = document.querySelector('[data-progress-status]');
+        const dot = document.querySelector('[data-progress-dot]');
+        if (status) {
+          status.textContent = t(exportRunning ? 'status.RUNNING' : 'status.IDLE');
+          status.classList.toggle('text-primary', exportRunning);
+          status.classList.toggle('text-on-surface-variant', !exportRunning);
+        }
+        if (dot) {
+          dot.classList.toggle('bg-primary', exportRunning);
+          dot.classList.toggle('animate-pulse', exportRunning);
+          dot.classList.toggle('bg-on-surface-variant', !exportRunning);
+        }
+        if (!exportRunning && pauseButton) {
+          pauseButton.dataset.paused = 'false';
+          pauseButton.innerHTML = '<span class="material-symbols-outlined text-[18px]">pause</span> ' + t('progress.pause');
+        }
+        updateProgressControls();
+      }
+
+      function resetProgressUI() {
+        exportStartTime = Date.now();
+        const config = window.noteUnarchiveState?.currentExportConfig || {};
+        const target = document.querySelector('[data-progress-target]');
+        if (target) target.textContent = t('progress.targetPrefix') + ' ' + (config.destinationDir || '-');
+        const current = document.querySelector('[data-progress-current]');
+        if (current) current.textContent = t('progress.waiting');
+        const count = document.querySelector('[data-progress-count]');
+        if (count) count.textContent = t('progress.zeroFiles');
+        const eta = document.querySelector('[data-progress-eta]');
+        if (eta) eta.textContent = '--:--';
+        const pct = document.querySelector('[data-progress-percent]');
+        if (pct) pct.textContent = '0%';
+        const bar = document.querySelector('[data-progress-bar]');
+        if (bar) bar.style.width = '0%';
+        const counters = [
+          ['[data-progress-notes]', '0 / 0'],
+          ['[data-progress-attachments]', '0'],
+          ['[data-progress-bytes]', '0.0 MB'],
+        ];
+        counters.forEach(([selector, value]) => {
+          const element = document.querySelector(selector);
+          if (element) element.textContent = value;
+        });
+        const logPanel = document.querySelector('[data-progress-log]');
+        if (logPanel) logPanel.innerHTML = '';
+      }
+
+      function updateProgress(data) {
+        const pct = document.querySelector('[data-progress-percent]');
+        if (pct) pct.textContent = (data.percent || 0) + '%';
+        const bar = document.querySelector('[data-progress-bar]');
+        if (bar) bar.style.width = (data.percent || 0) + '%';
+
+        const current = document.querySelector('[data-progress-current]');
+        if (current) current.textContent = data.currentFile ? `${t('progress.processingLabel')} ${data.currentFile}` : t('progress.waiting');
+        const count = document.querySelector('[data-progress-count]');
+        if (count) count.textContent = `${data.current || 0} / ${data.total || 0} ${t('progress.filesSuffix')}`;
+        const notes = document.querySelector('[data-progress-notes]');
+        if (notes) notes.textContent = `${data.notesExported || 0} / ${data.total || 0}`;
+        const attachments = document.querySelector('[data-progress-attachments]');
+        if (attachments) attachments.textContent = String(data.attachmentsCopied || 0);
+        const bytes = document.querySelector('[data-progress-bytes]');
+        if (bytes) bytes.textContent = ((data.bytesWritten || 0) / (1024 * 1024)).toFixed(1) + ' MB';
+
+        if (exportStartTime && data.percent > 0) {
+          const elapsed = (Date.now() - exportStartTime) / 1000;
+          const remaining = Math.max(0, elapsed / (data.percent / 100) - elapsed);
+          const eta = document.querySelector('[data-progress-eta]');
+          if (eta) eta.textContent = '00:' + String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(Math.floor(remaining % 60)).padStart(2, '0');
+        }
+      }
+
+      function appendLog(entry) {
+        const logPanel = document.querySelector('[data-progress-log]');
+    if (!logPanel) return;
+    const statusColor = { OK: 'text-primary', ERROR: 'text-error', SKIPPED: 'text-tertiary', 'IN PROGRESS': 'text-on-surface' };
+    const div = document.createElement('div');
+    div.className = 'flex gap-sm';
+    const status = entry.status || 'INFO';
+    div.innerHTML = `<span class="text-tertiary">[${new Date(entry.timestamp || Date.now()).toLocaleTimeString()}]</span><span>${entry.message || ''}</span><span class="${statusColor[status] || 'text-on-surface-variant'} ml-auto">[${t('status.' + status)}]</span>`;
+    logPanel.appendChild(div);
+    logPanel.scrollTop = logPanel.scrollHeight;
+  }
+
+  function onExportComplete(data) {
+    setRunningState(false);
+    const summary = data.summary || data;
+    appendLog({
+      timestamp: new Date().toISOString(),
+      message: t('progress.complete', {
+        status: t('status.' + (summary.status || 'INFO')),
+        exported: summary.notesExported || 0,
+        skipped: summary.notesSkipped || 0,
+        errors: summary.notesError || 0,
+      }),
+      status: summary.status === 'COMPLETED' ? 'OK' : summary.status,
+    });
+  }
+
+  if (pauseButton) {
+    pauseButton.dataset.paused = 'false';
+    pauseButton.addEventListener('click', async () => {
+      if (!exportRunning) {
+        showToast(t('toast.noRunningExport'));
+        return;
+      }
+      const pausing = pauseButton.dataset.paused !== 'true';
+      if (pausing) {
+        await window.api.pauseExport();
+        pauseButton.dataset.paused = 'true';
+        pauseButton.innerHTML = '<span class="material-symbols-outlined text-[18px]">play_arrow</span> ' + t('progress.resume');
+      } else {
+        await window.api.resumeExport();
+        pauseButton.dataset.paused = 'false';
+        pauseButton.innerHTML = '<span class="material-symbols-outlined text-[18px]">pause</span> ' + t('progress.pause');
+      }
+    });
+  }
+
+  if (cancelButton) {
+    cancelButton.addEventListener('click', async () => {
+      if (!exportRunning) {
+        showToast(t('toast.noRunningExport'));
+        return;
+      }
+      if (confirm(t('progress.confirmCancel'))) {
+        await window.api.cancelExport();
+        setRunningState(false);
+      }
+    });
+  }
+
+  if (window.api) {
+    window.api.onExportProgress(updateProgress);
+    window.api.onExportLog(appendLog);
+    window.api.onExportComplete(onExportComplete);
+  }
+
+  window._resetProgressUI = resetProgressUI;
+  window._updateProgress = updateProgress;
+  window._appendLog = appendLog;
+  window._onExportComplete = onExportComplete;
+  window._setRunningState = setRunningState;
+  updateProgressControls();
+})();
+</script>
+
+<script id="app-logic-history">
+(function () {
+  function escapeHtml(value) {
+    return String(value || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function t(key, params) {
+    return window.noteUnarchiveI18n?.t(key, params) || key;
+  }
+
+  function showToast(message) {
+    window.noteUnarchiveUi?.showToast(message);
+  }
+
+  async function loadHistory() {
+    const listEl = document.querySelector('#screen-history section:first-of-type');
+    if (!listEl || !window.api) return;
+    const records = await window.api.listHistory();
+    if (window.noteUnarchiveState) window.noteUnarchiveState.historyRecords = records;
+    const header = listEl.firstElementChild;
+    listEl.innerHTML = '';
+    if (header) listEl.appendChild(header);
+
+    if (!records.length) {
+      const empty = document.createElement('div');
+      empty.className = 'px-lg py-md text-on-surface-variant font-body-sm text-body-sm';
+      empty.textContent = t('history.empty');
+      listEl.appendChild(empty);
+      return;
+    }
+
+    for (const [index, record] of records.entries()) {
+      const completed = record.status === 'COMPLETED';
+      const size = record.totalBytes ? (record.totalBytes / (1024 * 1024)).toFixed(1) + ' MB' : '';
+      const statusText = t('status.' + (record.status || 'INFO'));
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-md px-lg py-md border-b border-outline-variant hover:bg-surface-container-high transition-colors';
+      row.innerHTML = `
+        <div class="w-8 h-8 rounded bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined ${completed ? 'text-primary' : 'text-error'} text-[16px]">${completed ? 'check_circle' : 'cancel'}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-sm mb-xs">
+            <span class="font-body-base text-body-base text-on-surface font-medium">${escapeHtml(record.source)} - ${escapeHtml(record.account || '')}</span>
+            <span class="font-mono-label text-mono-label text-on-surface-variant bg-surface-variant border border-outline-variant px-xs py-[2px] rounded">${escapeHtml((record.format || '').toUpperCase())}</span>
+          </div>
+          <div class="flex items-center gap-md font-data-tabular text-data-tabular text-on-surface-variant">
+            <span>${escapeHtml(t('history.notes', { count: record.notesExported || record.noteCount || 0 }))}</span>
+            ${size ? '<span>' + size + '</span>' : ''}
+            ${record.destPath ? '<span class="truncate max-w-xs">' + escapeHtml(record.destPath) + '</span>' : ''}
+          </div>
+        </div>
+        <div class="text-right shrink-0">
+          <div class="font-data-tabular text-data-tabular text-on-surface-variant">${record.timestamp ? new Date(record.timestamp).toLocaleString() : ''}</div>
+          <div class="font-mono-label text-mono-label ${completed ? 'text-primary' : 'text-error'} mt-xs">${escapeHtml(statusText)}</div>
+        </div>
+        <button data-action="history-record-action" class="btn-history-action text-on-surface-variant hover:text-primary transition-colors ml-sm" data-history-index="${index}" data-dest="${escapeHtml(record.destPath || '')}" data-status="${escapeHtml(record.status || '')}">
+          <span class="material-symbols-outlined text-[20px]">${completed ? 'folder_open' : 'replay'}</span>
+        </button>`;
+      listEl.appendChild(row);
+    }
+  }
+
+  async function loadSettings() {
+    if (!window.api) return;
+    const settings = await window.api.getSettings();
+    const panel = document.querySelector('#screen-history section:last-of-type');
+    if (!panel) return;
+    const checkboxes = panel.querySelectorAll('input[type="checkbox"]');
+    const dirInput = panel.querySelector('input[type="text"]');
+    const slider = panel.querySelector('input[type="range"]');
+    const sliderLabel = slider?.nextElementSibling;
+
+    if (checkboxes[0]) checkboxes[0].checked = settings.autoDetect !== false;
+    if (checkboxes[1]) checkboxes[1].checked = settings.sha256 !== false;
+    if (dirInput) dirInput.value = settings.defaultExportDir || '';
+    if (slider) slider.value = settings.threads || 4;
+    if (sliderLabel) sliderLabel.textContent = slider?.value || '4';
+  }
+
+  document.addEventListener('click', async (event) => {
+    const clearButton = event.target.closest('#screen-history .flex.justify-between.items-end > button');
+    if (clearButton) {
+      if (!window.api) {
+        showToast(t('toast.noApi'));
+        return;
+      }
+      if (confirm(t('history.confirmClear'))) {
+        await window.api.clearHistory();
+        await loadHistory();
+        showToast(t('toast.settingsSaved'));
+      }
+      return;
+    }
+
+    const action = event.target.closest('.btn-history-action');
+    if (action) {
+      const records = window.noteUnarchiveState?.historyRecords || [];
+      const record = records[Number(action.dataset.historyIndex)] || {};
+      if (action.dataset.status === 'COMPLETED') {
+        if (!window.api) {
+          showToast(t('toast.noApi'));
+          return;
+        }
+        if (!action.dataset.dest) {
+          showToast(t('toast.openPathFailed', { message: 'empty path' }));
+          return;
+        }
+        try {
+          await window.api.openPath(action.dataset.dest);
+        } catch (error) {
+          showToast(t('toast.openPathFailed', { message: error?.message || String(error) }));
+        }
+      } else {
+        const config = record.config || {};
+        window.noteUnarchiveState.selectedSource = Object.assign({}, config);
+        window.noteUnarchiveState.currentExportConfig = Object.assign({}, config);
+        window._applyExportConfig?.(config);
+        document.querySelector('[data-screen="config"]')?.click();
+      }
+      return;
+    }
+
+    const browse = event.target.closest('#screen-history section:last-of-type button');
+    if (browse) {
+      if (!window.api) {
+        showToast(t('toast.noApi'));
+        return;
+      }
+      const dir = await window.api.browseSource();
+      const input = document.querySelector('#screen-history section:last-of-type input[type="text"]');
+      if (dir && input) {
+        input.value = dir;
+        await window.api.setSettings({ defaultExportDir: dir });
+        showToast(t('toast.settingsSaved'));
+      }
+    }
+  });
+
+  document.addEventListener('change', async (event) => {
+    const panel = event.target.closest('#screen-history section:last-of-type');
+    if (!panel) return;
+    if (!window.api) {
+      showToast(t('toast.noApi'));
+      return;
+    }
+    const checkboxes = panel.querySelectorAll('input[type="checkbox"]');
+    const dirInput = panel.querySelector('input[type="text"]');
+    if (event.target === checkboxes[0]) await window.api.setSettings({ autoDetect: checkboxes[0].checked });
+    if (event.target === checkboxes[1]) await window.api.setSettings({ sha256: checkboxes[1].checked });
+    if (event.target === dirInput) await window.api.setSettings({ defaultExportDir: dirInput.value });
+    showToast(t('toast.settingsSaved'));
+  });
+
+  document.addEventListener('input', async (event) => {
+    const slider = event.target.closest('#screen-history section:last-of-type input[type="range"]');
+    if (!slider) return;
+    const label = slider.nextElementSibling;
+    if (label) label.textContent = slider.value;
+    if (!window.api) {
+      showToast(t('toast.noApi'));
+      return;
+    }
+    await window.api.setSettings({ threads: parseInt(slider.value, 10) });
+    showToast(t('toast.settingsSaved'));
+  });
+
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('[data-screen]');
+    if (link?.dataset.screen === 'history') {
+      setTimeout(() => {
+        loadHistory();
+        loadSettings();
+      }, 0);
+    }
+  });
+
+  if (window.api) window.api.onExportComplete(() => loadHistory());
+  if (window.noteUnarchiveState) {
+    window.noteUnarchiveState.refreshHistory = () => {
+      loadHistory();
+      loadSettings();
+    };
+  }
+  loadSettings();
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     NAVIGATION CONTROLLER
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  const SCREENS = ['config', 'progress', 'history', 'sources'];
+
+  // Nav label → screen key mapping for top bar
+  const TOP_NAV_MAP = {
+    'sources': 'sources',
+    'export config': 'config',
+    'status': 'progress'
+  };
+
+  // Side nav icon map per screen (active state)
+  const SIDE_ICON_MAP = {
+    sources: 0,
+    config: 1,
+    progress: 2,
+    history: 3
+  };
+
+  function showScreen(key) {
+    if (!SCREENS.includes(key)) return;
+
+    // Toggle screen visibility
+    SCREENS.forEach(s => {
+      const el = document.getElementById('screen-' + s);
+      if (el) el.classList.toggle('active', s === key);
+    });
+
+    // Update side nav active state
+    const sideLinks = document.querySelectorAll('#sidenav .nav-link');
+    sideLinks.forEach(link => {
+      const isActive = link.dataset.screen === key;
+      link.classList.toggle('bg-secondary-container', isActive);
+      link.classList.toggle('text-on-secondary-container', isActive);
+      link.classList.toggle('rounded-lg', isActive);
+      link.classList.toggle('font-medium', isActive);
+      link.classList.toggle('opacity-90', isActive);
+      link.classList.toggle('text-on-surface-variant', !isActive);
+      link.classList.toggle('hover:text-on-surface', !isActive);
+      link.classList.toggle('hover:bg-surface-container-highest', !isActive);
+      // Icon fill
+      const icon = link.querySelector('.material-symbols-outlined');
+      if (icon) {
+        icon.style.fontVariationSettings = isActive
+          ? "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+          : "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+        if (isActive) icon.classList.add('text-primary');
+        else icon.classList.remove('text-primary');
+      }
+    });
+
+    // Update top bar active state
+    const topLinks = document.querySelectorAll('header .top-nav-link');
+    topLinks.forEach(link => {
+      const isActive = link.dataset.screen === key;
+      link.classList.toggle('text-primary', isActive);
+      link.classList.toggle('font-bold', isActive);
+      link.classList.toggle('border-b-2', isActive);
+      link.classList.toggle('border-primary', isActive);
+      link.classList.toggle('text-on-surface-variant', !isActive);
+    });
+
+    document.title = window.noteUnarchiveI18n?.t('title.' + key) || 'NoteUnarchive';
+    window.noteUnarchiveI18n?.applyLanguage();
+    if (key === 'config') {
+      window._ensureNotebookTree?.();
+      window._updateExportEstimate?.();
+    }
+  }
+
+  // Bind all nav-link elements (side nav + top bar + in-content buttons)
+  document.addEventListener('click', function (e) {
+    const link = e.target.closest('[data-screen]');
+    if (!link) return;
+    e.preventDefault();
+    showScreen(link.dataset.screen);
+    if (link.dataset.scrollTarget === 'settings') {
+      setTimeout(() => {
+        document.querySelector('#screen-history section:last-of-type')?.scrollIntoView({ block: 'start' });
+      }, 0);
+    }
+  });
+
+  // Boot on config screen (initial screen per spec)
+  showScreen('config');
+})();
+</script>
+</body>
+</html>

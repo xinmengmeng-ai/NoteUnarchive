@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Release artifacts are intentionally tracked under release/
+!release/
+!release/**
+
+# Electron builder cache
+.cache/
+
+# Temporary files
+tmp/
+temp/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Test coverage
+coverage/
+
+# Local and process-only files
+.agents/
+.specify/
+AGENTS.md
+docs/
+youdaoyun-export/
+cleanup-*.json
+cleanup-*.md
+
+# Local export/output folders
+数据源选择/
+导出配置/
+任务进度/
+导出历史与设置/

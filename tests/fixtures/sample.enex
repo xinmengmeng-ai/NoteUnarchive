@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<en-export>
+  <note>
+    <title>Sample Note</title>
+    <created>20240101T010203Z</created>
+    <updated>20240102T030405Z</updated>
+    <content><![CDATA[<?xml version="1.0" encoding="UTF-8"?><en-note><div>Hello Evernote</div></en-note>]]></content>
+  </note>
+</en-export>
