@@ -115,6 +115,11 @@ function parseMarkupBlocks(content, knownResources = new Map()) {
       if (table) blocks.push(table);
       continue;
     }
+    if ((tag === 'p' || tag === 'div') && /^<(img|en-media)\b[^>]*\/?>$/i.test(inner.trim())) {
+      const image = mediaBlockFromTag(inner.trim(), knownResources);
+      if (image) blocks.push(image);
+      continue;
+    }
     if (tag === 'ul' || tag === 'ol') {
       const items = [];
       const itemPattern = /<li\b[^>]*>([\s\S]*?)<\/li>/gi;

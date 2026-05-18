@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
+const { toDocxBuffer } = require('./converter/docx');
 const { toHtml } = require('./converter/html');
 const { toJson } = require('./converter/json');
 const { toMarkdown } = require('./converter/markdown');
@@ -13,6 +14,7 @@ const EXTENSIONS = {
   markdown: '.md',
   json: '.json',
   html: '.html',
+  docx: '.docx',
 };
 
 function safeName(value) {
@@ -98,6 +100,7 @@ class Exporter extends EventEmitter {
       config,
     };
     const checksums = [];
+    const usedOutputPaths = new Map();
 
     ensureDir(config.destinationDir);
 
@@ -110,7 +113,7 @@ class Exporter extends EventEmitter {
 
       const note = notes[index];
       try {
-        const result = this._exportNote(note, config);
+        const result = await this._exportNote(note, config, usedOutputPaths);
         if (result.skipped) {
           summary.notesSkipped += 1;
           this.emit('log', { timestamp: new Date().toISOString(), message: `Skipped ${note.title}`, status: 'SKIPPED' });
@@ -148,7 +151,7 @@ class Exporter extends EventEmitter {
     return summary;
   }
 
-  estimate(config) {
+  async estimate(config) {
     const notes = this._collectNotes(config);
     const summary = {
       source: config.source,
@@ -163,11 +166,11 @@ class Exporter extends EventEmitter {
     };
 
     for (const note of notes) {
-      const content = this._renderNote(note, config);
-      summary.contentBytes += Buffer.byteLength(content);
+      summary.contentBytes += await this._estimateContentBytes(note, config);
 
       if (config.includeAttachments !== false) {
         for (const resource of note.resources || []) {
+          if (config.format === 'docx' && this._shouldEmbedImageInDocx(note, resource)) continue;
           const size = this._resourceSize(resource);
           if (size === null) continue;
           summary.attachmentCount += 1;
@@ -178,6 +181,12 @@ class Exporter extends EventEmitter {
 
     summary.totalBytes = summary.contentBytes + summary.attachmentBytes;
     return summary;
+  }
+
+  async _estimateContentBytes(note, config) {
+    if (config.format === 'docx') return this._estimateDocxContentBytes(note, config);
+    const content = await this._renderNote(note, config);
+    return byteLength(content);
   }
 
   _collectNotes(config) {
@@ -200,42 +209,61 @@ class Exporter extends EventEmitter {
     });
   }
 
-  _outputPath(note, config) {
+  _outputPath(note, config, usedOutputPaths = null) {
     const extension = EXTENSIONS[config.format] || '.md';
     const parts = [config.destinationDir];
     if (config.rebuildHierarchy && note.notebook) {
       parts.push(...String(note.notebook).split(/[\\/]/).filter(Boolean).map(safeName));
     }
     ensureDir(path.join(...parts));
-    return path.join(...parts, `${safeName(note.title)}${extension}`);
+    const outputPath = path.join(...parts, `${safeName(note.title)}${extension}`);
+    return usedOutputPaths ? reserveUniqueOutputPath(outputPath, usedOutputPaths) : outputPath;
   }
 
-  _renderNote(note, config) {
+  async _renderNote(note, config) {
     if (config.format === 'json') return `${JSON.stringify(toJson(note, config), null, 2)}\n`;
     if (config.format === 'html') return toHtml(note, config);
+    if (config.format === 'docx') return toDocxBuffer(note, config);
     return toMarkdown(note, config);
   }
 
-  _exportNote(note, config) {
-    const outputPath = this._outputPath(note, config);
+  _estimateDocxContentBytes(note, config) {
+    const textBytes = Buffer.byteLength(toMarkdown(note, { ...config, includeAttachments: false }), 'utf-8');
+    const blockCount = Array.isArray(note.blocks) ? note.blocks.length : 0;
+    let estimated = 9000 + blockCount * 512 + Math.ceil(textBytes * 1.8);
+
+    if (config.includeAttachments !== false) {
+      for (const resource of note.resources || []) {
+        if (!this._shouldEmbedImageInDocx(note, resource)) continue;
+        estimated += this._resourceSize(resource) || 0;
+      }
+    }
+
+    return estimated;
+  }
+
+  async _exportNote(note, config, usedOutputPaths = null) {
+    const outputPath = this._outputPath(note, config, usedOutputPaths);
     if (config.incremental && fs.existsSync(outputPath)) {
       const outputMtimeSeconds = Math.floor(fs.statSync(outputPath).mtimeMs / 1000);
       if (noteModifiedSeconds(note) <= outputMtimeSeconds) return { skipped: true };
     }
 
     const files = [];
-    const content = this._renderNote(note, config);
-    fs.writeFileSync(outputPath, content, 'utf-8');
+    const content = await this._renderNote(note, config);
+    if (Buffer.isBuffer(content)) fs.writeFileSync(outputPath, content);
+    else fs.writeFileSync(outputPath, content, 'utf-8');
     files.push(outputPath);
-    let bytesWritten = Buffer.byteLength(content);
+    let bytesWritten = byteLength(content);
     let attachmentCount = 0;
 
     if (config.includeAttachments !== false) {
       const assetDir = path.join(path.dirname(outputPath), 'assets');
-      ensureDir(assetDir);
       for (const resource of note.resources || []) {
+        if (config.format === 'docx' && this._shouldEmbedImageInDocx(note, resource)) continue;
         const fileName = this._assetFileName(note, resource);
         const destPath = path.join(assetDir, fileName);
+        ensureDir(assetDir);
         if (resource.data) fs.writeFileSync(destPath, resource.data);
         else if (resource.localPath && fs.existsSync(resource.localPath)) fs.copyFileSync(resource.localPath, destPath);
         else continue;
@@ -264,6 +292,18 @@ class Exporter extends EventEmitter {
     if (resource.localPath && fs.existsSync(resource.localPath)) return fs.statSync(resource.localPath).size;
     return null;
   }
+
+  _shouldEmbedImageInDocx(note, resource) {
+    const resourceId = resource?.resourceId;
+    if (!resourceId) return false;
+
+    return (note.blocks || []).some((block) => {
+      if (block.type === 'image' && block.resourceId === resourceId) return true;
+      if (block.type !== 'markdown') return false;
+      const pattern = new RegExp(`!\\[[^\\]]*\\]\\([^)]*${escapeRegExp(resourceId)}(?:\\.[^)\\s]+)?[^)]*\\)`);
+      return pattern.test(block.text || '');
+    });
+  }
 }
 
 function extensionFromMime(mimeType) {
@@ -283,6 +323,32 @@ function normalizeNotebookPath(value) {
     .split(/[\\/]/)
     .filter(Boolean)
     .join('/');
+}
+
+function byteLength(value) {
+  return Buffer.isBuffer(value) ? value.length : Buffer.byteLength(value);
+}
+
+function escapeRegExp(value) {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function reserveUniqueOutputPath(outputPath, usedOutputPaths) {
+  const parsed = path.parse(outputPath);
+  let candidate = outputPath;
+  let suffix = 2;
+
+  while (usedOutputPaths.has(outputPathKey(candidate))) {
+    candidate = path.join(parsed.dir, `${parsed.name} (${suffix})${parsed.ext}`);
+    suffix += 1;
+  }
+
+  usedOutputPaths.set(outputPathKey(candidate), true);
+  return candidate;
+}
+
+function outputPathKey(outputPath) {
+  return path.resolve(outputPath).toLowerCase();
 }
 
 module.exports = Exporter;

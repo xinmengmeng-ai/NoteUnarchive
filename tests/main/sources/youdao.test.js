@@ -6,7 +6,7 @@ const Database = require('better-sqlite3');
 const youdao = require('../../../src/main/sources/youdao');
 
 function makeTmpDir(name) {
-  const root = path.join(__dirname, '../../../..', 'tmp');
+  const root = path.join(__dirname, '../../..', 'tmp');
   fs.mkdirSync(root, { recursive: true });
   return fs.mkdtempSync(path.join(root, `${name}-`));
 }
@@ -37,13 +37,14 @@ describe('YoudaoNote source', () => {
     const dataDir = path.join(tmpDir, 'ynote-desktop', 'user@example.com', 'ynote-data');
     fs.mkdirSync(dataDir, { recursive: true });
     fs.writeFileSync(path.join(dataDir, 'user@example.com.db'), '');
-    fs.writeFileSync(path.join(dataDir, 'content.db'), '');
+    fs.writeFileSync(path.join(dataDir, 'user@example.com-content.db'), '');
 
     expect(youdao.detect()).toEqual([
       {
         account: 'user@example.com',
         dataDir,
         dbPath: path.join(dataDir, 'user@example.com.db'),
+        contentDbPath: path.join(dataDir, 'user@example.com-content.db'),
         fileDir: path.join(dataDir, 'file'),
       },
     ]);
@@ -110,7 +111,7 @@ describe('YoudaoNote source', () => {
     ]);
   });
 
-  test('listNotebookTree() counts only notes with local files when fileDir is provided', () => {
+  test('listNotebookTree() counts only notes with local body or content-db fallback when fileDir is provided', () => {
     const dbPath = path.join(tmpDir, 'test@example.com.db');
     const fileDir = path.join(tmpDir, 'file');
     fs.mkdirSync(path.join(fileDir, '1'), { recursive: true });
@@ -134,6 +135,97 @@ describe('YoudaoNote source', () => {
     db.close();
 
     expect(youdao.listNotebookTree(dbPath, fileDir)[0].noteCount).toBe(1);
+  });
+
+  test('listNotebookTree() counts notes with content-db fallback when note files are missing', () => {
+    const dbPath = path.join(tmpDir, 'test@example.com.db');
+    const contentDbPath = path.join(tmpDir, 'test@example.com-content.db');
+    const fileDir = path.join(tmpDir, 'file');
+    fs.mkdirSync(fileDir, { recursive: true });
+    const db = new Database(dbPath);
+    db.exec(`
+      CREATE TABLE note_book (fileId TEXT, title TEXT, parentId TEXT, del INTEGER);
+      CREATE TABLE note (
+        fileId TEXT,
+        title TEXT,
+        parentId TEXT,
+        contentSynced INTEGER,
+        resources TEXT,
+        modifyTime INTEGER,
+        del INTEGER
+      );
+    `);
+    db.prepare('INSERT INTO note_book VALUES (?, ?, ?, ?)').run('root', 'Root', null, 0);
+    db.prepare('INSERT INTO note VALUES (?, ?, ?, ?, ?, ?, ?)').run('n1', 'Fallback Note', 'root', 0, '[]', 1700000000000, 0);
+    db.close();
+    const contentDb = new Database(contentDbPath);
+    contentDb.exec("CREATE VIRTUAL TABLE contenttable USING fts5(fileId, content, title, erased, isUpdateContent)");
+    contentDb.prepare('INSERT INTO contenttable VALUES (?, ?, ?, ?, ?)').run('n1', 'Cached plain text', 'Fallback Note', '0', '1');
+    contentDb.close();
+
+    expect(youdao.listNotebookTree(dbPath, fileDir, contentDbPath)[0].noteCount).toBe(1);
+  });
+
+  test('collectNotes() uses content-db plain text when the note body file is missing', () => {
+    const dbPath = path.join(tmpDir, 'test@example.com.db');
+    const contentDbPath = path.join(tmpDir, 'test@example.com-content.db');
+    const fileDir = path.join(tmpDir, 'file');
+    fs.mkdirSync(fileDir, { recursive: true });
+    const db = new Database(dbPath);
+    db.exec(`
+      CREATE TABLE note_book (fileId TEXT, title TEXT, parentId TEXT, del INTEGER);
+      CREATE TABLE note (
+        fileId TEXT,
+        title TEXT,
+        parentId TEXT,
+        contentSynced INTEGER,
+        resources TEXT,
+        modifyTime INTEGER,
+        del INTEGER
+      );
+      CREATE TABLE resource (resourceID TEXT, entry TEXT);
+    `);
+    db.prepare('INSERT INTO note_book VALUES (?, ?, ?, ?)').run('root', 'Root', null, 0);
+    db.prepare('INSERT INTO note VALUES (?, ?, ?, ?, ?, ?, ?)').run('n1', 'Fallback Note.note', 'root', 0, '[]', 1700000000000, 0);
+    db.close();
+    const contentDb = new Database(contentDbPath);
+    contentDb.exec("CREATE VIRTUAL TABLE contenttable USING fts5(fileId, content, title, erased, isUpdateContent)");
+    contentDb.prepare('INSERT INTO contenttable VALUES (?, ?, ?, ?, ?)').run('n1', 'Cached https://example.com body', 'Fallback Note', '0', '1');
+    contentDb.close();
+
+    const notes = youdao.collectNotes({ dbPath, fileDir, contentDbPath });
+
+    expect(notes).toHaveLength(1);
+    expect(notes[0].title).toBe('Fallback Note.note');
+    expect(notes[0].notebook).toBe('Root');
+    expect(notes[0].blocks[0]).toMatchObject({ type: 'paragraph', text: 'Cached https://example.com body' });
+  });
+
+  test('collectNotes() skips notes without local body cache or content-db fallback', () => {
+    const dbPath = path.join(tmpDir, 'test@example.com.db');
+    const fileDir = path.join(tmpDir, 'file');
+    fs.mkdirSync(fileDir, { recursive: true });
+    const db = new Database(dbPath);
+    db.exec(`
+      CREATE TABLE note_book (fileId TEXT, title TEXT, parentId TEXT, del INTEGER);
+      CREATE TABLE note (
+        fileId TEXT,
+        title TEXT,
+        parentId TEXT,
+        contentSynced INTEGER,
+        resources TEXT,
+        modifyTime INTEGER,
+        del INTEGER
+      );
+      CREATE TABLE resource (resourceID TEXT, entry TEXT);
+    `);
+    db.prepare('INSERT INTO note_book VALUES (?, ?, ?, ?)').run('root', 'Root', null, 0);
+    db.prepare('INSERT INTO note VALUES (?, ?, ?, ?, ?, ?, ?)').run('n1', 'Missing Note.note', 'root', 0, '[]', 1700000000000, 0);
+    db.close();
+
+    const notes = youdao.collectNotes({ dbPath, fileDir });
+
+    expect(notes).toHaveLength(0);
   });
 
   test('loadResourceIndex() maps existing resources and skips missing files', () => {

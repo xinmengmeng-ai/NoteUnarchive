@@ -12,7 +12,6 @@ const MAGIC_EXT = [
   { magic: Buffer.from('RIFF'), extension: '.webp' },
   { magic: Buffer.from('<svg'), extension: '.svg' },
 ];
-
 function guessResourceExtension(filePath) {
   const ext = path.extname(filePath);
   if (ext) return ext;
@@ -54,10 +53,13 @@ function detect() {
 
     if (dbFiles.length === 0) continue;
 
+    const dbPath = path.join(dataDir, dbFiles[0]);
+    const contentDbPath = resolveContentDbPath({ account: entry.name, dataDir, dbPath });
     results.push({
       account: entry.name,
       dataDir,
-      dbPath: path.join(dataDir, dbFiles[0]),
+      dbPath,
+      ...(contentDbPath ? { contentDbPath } : {}),
       fileDir: path.join(dataDir, 'file'),
     });
   }
@@ -111,13 +113,63 @@ function loadNoteTree(dbPath) {
 }
 
 function noteFileExists(fileDir, fileId) {
-  if (!fileDir || !fileId) return true;
+  if (!fileId) return false;
+  if (!fileDir) return true;
   const lastChar = fileId[fileId.length - 1].toLowerCase();
   return fs.existsSync(path.join(fileDir, lastChar, fileId));
 }
 
-function listNotebookTree(dbPath, fileDir) {
+function noteHasExportableContent(fileDir, fileId, contentIndex) {
+  if (noteFileExists(fileDir, fileId)) return true;
+  if (contentIndex?.get(fileId)?.content) return true;
+  return false;
+}
+
+function resolveContentDbPath(config = {}) {
+  if (config.contentDbPath && fs.existsSync(config.contentDbPath)) return config.contentDbPath;
+  const dataDir = config.dataDir || (config.dbPath ? path.dirname(config.dbPath) : '');
+  if (!dataDir || !fs.existsSync(dataDir)) return '';
+
+  const candidates = [];
+  if (config.account) candidates.push(path.join(dataDir, `${config.account}-content.db`));
+  if (config.dbPath) candidates.push(path.join(dataDir, `${path.basename(config.dbPath, '.db')}-content.db`));
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  const discovered = fs.readdirSync(dataDir).find((fileName) => fileName.endsWith('-content.db'));
+  return discovered ? path.join(dataDir, discovered) : '';
+}
+
+function loadContentIndex(contentDbPath) {
+  const index = new Map();
+  if (!contentDbPath || !fs.existsSync(contentDbPath)) return index;
+
+  let db;
+  try {
+    db = new Database(contentDbPath, { readonly: true, fileMustExist: true });
+    const rows = db.prepare('SELECT fileId, content, title, erased FROM contenttable').all();
+    for (const row of rows) {
+      if (!row.fileId || String(row.erased || '0') !== '0') continue;
+      const content = String(row.content || '').trim();
+      if (!content) continue;
+      index.set(row.fileId, {
+        content,
+        title: row.title || '',
+      });
+    }
+  } catch {
+    return index;
+  } finally {
+    if (db) db.close();
+  }
+
+  return index;
+}
+
+function listNotebookTree(dbPath, fileDir, contentDbPath) {
   const { nodes, roots } = loadNoteTree(dbPath);
+  const contentIndex = loadContentIndex(contentDbPath || resolveContentDbPath({ dbPath }));
 
   function noteCountFor(folderId) {
     const node = nodes.get(folderId);
@@ -126,7 +178,7 @@ function listNotebookTree(dbPath, fileDir) {
     for (const childId of node.children || []) {
       const child = nodes.get(childId);
       if (!child) continue;
-      count += child.isDir ? noteCountFor(childId) : noteFileExists(fileDir, childId) ? 1 : 0;
+      count += child.isDir ? noteCountFor(childId) : noteHasExportableContent(fileDir, childId, contentIndex) ? 1 : 0;
     }
     return count;
   }
@@ -158,7 +210,12 @@ function loadResourceIndex(dbPath) {
   const dataDir = path.dirname(dbPath);
 
   try {
-    const rows = db.prepare('SELECT resourceID, entry FROM resource').all();
+    let rows = [];
+    try {
+      rows = db.prepare('SELECT resourceID, entry FROM resource').all();
+    } catch {
+      return index;
+    }
     for (const row of rows) {
       if (row.entry && fs.existsSync(row.entry)) {
         index.set(row.resourceID, row.entry);
@@ -176,7 +233,7 @@ function loadResourceIndex(dbPath) {
 }
 
 function readNoteFile(fileDir, fileId) {
-  if (!fileId) return null;
+  if (!fileDir || !fileId) return null;
   const lastChar = fileId[fileId.length - 1].toLowerCase();
   const filePath = path.join(fileDir, lastChar, fileId);
   if (!fs.existsSync(filePath)) return null;
@@ -197,11 +254,14 @@ function notebookPath(nodes, parentId) {
 function collectNotes(config) {
   const tree = loadNoteTree(config.dbPath);
   const resourceIndex = loadResourceIndex(config.dbPath);
+  const contentIndex = loadContentIndex(resolveContentDbPath(config));
   const notes = [];
   for (const [fileId, node] of tree.nodes.entries()) {
     if (node.isDir) continue;
     const raw = readNoteFile(config.fileDir, fileId);
-    if (!raw) continue;
+    const fallback = raw ? null : contentIndex.get(fileId);
+    const content = raw || fallback?.content;
+    if (!content) continue;
     notes.push(
       parseYoudaoNote(
         {
@@ -212,7 +272,7 @@ function collectNotes(config) {
           notebook: notebookPath(tree.nodes, node.parent),
           rawResources: node.resources,
         },
-        raw,
+        content,
         resourceIndex
       )
     );
@@ -224,7 +284,7 @@ const adapter = {
   id: 'youdao',
   name: 'YoudaoNote',
   detect,
-  listTree: (source) => (source?.dbPath ? listNotebookTree(source.dbPath, source.fileDir) : []),
+  listTree: (source) => (source?.dbPath ? listNotebookTree(source.dbPath, source.fileDir, resolveContentDbPath(source)) : []),
   collectNotes,
 };
 
@@ -234,7 +294,9 @@ module.exports = {
   detect,
   loadNoteTree,
   listNotebookTree,
+  loadContentIndex,
   loadResourceIndex,
   readNoteFile,
+  resolveContentDbPath,
   guessResourceExtension,
 };

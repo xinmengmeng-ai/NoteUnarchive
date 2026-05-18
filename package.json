@@ -21,13 +21,16 @@
   "license": "MIT",
   "dependencies": {
     "better-sqlite3": "12.10.0",
-    "fast-xml-parser": "5.8.0"
+    "docx": "9.6.1",
+    "fast-xml-parser": "5.8.0",
+    "markdown-it": "14.1.1"
   },
   "devDependencies": {
     "cross-env": "10.1.0",
+    "electron": "33.4.1",
     "electron-builder": "26.8.1",
     "electron-rebuild": "3.2.9",
-    "electron": "33.4.1",
-    "jest": "30.4.2"
+    "jest": "30.4.2",
+    "jszip": "3.10.1"
   }
 }

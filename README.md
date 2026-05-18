@@ -22,8 +22,10 @@ These sources are planned for future releases and are not supported in v1.0:
 ## Export Formats
 
 - Markdown: note content with local asset references
-- JSON: structured note data for further processing
+- Word: single-file `.docx` documents with embedded images for upload and sharing
 - HTML: standalone documents viewable in a browser
+
+Legacy JSON export data remains readable in history for compatibility, but JSON is no longer offered for new exports.
 
 ## Requirements
 
@@ -79,7 +81,7 @@ tests/         Jest tests and fixtures
 
 - The app reads local data only and does not upload note content.
 - Export quality depends on the completeness of the local note cache.
-- Some rich text styles may be normalized to Markdown-compatible output.
+- Some rich text styles may be normalized during export rather than reproduced pixel-for-pixel.
 
 ## License
 

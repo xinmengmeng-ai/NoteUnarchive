@@ -229,15 +229,15 @@
             <span class="font-mono-label text-mono-label text-primary uppercase mb-xs">Markdown</span>
             <span class="font-body-sm text-body-sm text-on-secondary-container">Preserves formatting for Markdown workflows.</span>
           </label>
-          <label class="relative cursor-pointer flex flex-col p-md rounded border border-outline-variant bg-surface hover:bg-surface-container-highest transition-colors">
-            <input class="sr-only" name="format" type="radio" value="json"/>
-            <div class="flex justify-between items-start mb-sm">
-              <span class="material-symbols-outlined text-on-surface-variant">data_object</span>
-              <span data-format-check class="material-symbols-outlined text-primary text-[18px] hidden" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-            </div>
-            <span class="font-mono-label text-mono-label text-on-surface uppercase mb-xs">JSON Array</span>
-            <span class="font-body-sm text-body-sm text-on-surface-variant">Structured data ideal for programmatic ingestion.</span>
-          </label>
+            <label class="relative cursor-pointer flex flex-col p-md rounded border border-outline-variant bg-surface hover:bg-surface-container-highest transition-colors">
+              <input class="sr-only" name="format" type="radio" value="docx"/>
+              <div class="flex justify-between items-start mb-sm">
+                <span class="material-symbols-outlined text-on-surface-variant">description</span>
+                <span data-format-check class="material-symbols-outlined text-primary text-[18px] hidden" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+              </div>
+              <span class="font-mono-label text-mono-label text-on-surface uppercase mb-xs">Word</span>
+              <span class="font-body-sm text-body-sm text-on-surface-variant">Best for uploads, sharing, and single-file storage.</span>
+            </label>
           <label class="relative cursor-pointer flex flex-col p-md rounded border border-outline-variant bg-surface hover:bg-surface-container-highest transition-colors">
             <input class="sr-only" name="format" type="radio" value="html"/>
             <div class="flex justify-between items-start mb-sm">
@@ -392,7 +392,7 @@
           <span class="material-symbols-outlined">description</span>
         </div>
         <div class="flex flex-col">
-          <span class="font-mono-label text-mono-label text-on-surface-variant">MARKDOWN NOTES</span>
+            <span class="font-mono-label text-mono-label text-on-surface-variant">NOTES</span>
           <span data-progress-notes class="font-data-tabular text-data-tabular text-on-surface text-lg">0 / 0</span>
         </div>
       </div>
@@ -587,8 +587,8 @@
   const textContainsBindings = [
     ['#screen-config', 'SOURCE CONNECTED', 'config.sourceConnected'],
     ['#screen-config', 'Preserves formatting for Markdown workflows.', 'config.markdownDesc'],
-    ['#screen-config', 'JSON Array', 'config.jsonArray'],
-    ['#screen-config', 'Structured data ideal for programmatic ingestion.', 'config.jsonDesc'],
+      ['#screen-config', 'Word', 'config.wordDoc'],
+      ['#screen-config', 'Best for uploads, sharing, and single-file storage.', 'config.wordDesc'],
     ['#screen-config', 'Static HTML', 'config.staticHtml'],
     ['#screen-config', 'Compiled views for browser viewing without client.', 'config.htmlDesc'],
     ['#screen-config', 'Include Attachments', 'config.includeAttachments'],
@@ -609,7 +609,7 @@
     ['#screen-progress', 'OPERATION CONTROLS', 'progress.controls'],
     ['#screen-progress', 'Pause Export', 'progress.pause'],
     ['#screen-progress', 'Cancel Operation', 'progress.cancel'],
-    ['#screen-progress', 'MARKDOWN NOTES', 'progress.markdownNotes'],
+      ['#screen-progress', 'NOTES', 'progress.notes'],
     ['#screen-progress', 'ATTACHMENTS', 'progress.attachments'],
     ['#screen-progress', 'DATA WRITTEN', 'progress.dataWritten'],
     ['#screen-progress', 'OUTPUT LOG', 'progress.outputLog'],
@@ -817,7 +817,7 @@
   }
 
   function sourceTitle(source) {
-    return source.source === 'youdao' ? '有道云笔记' : (source.name || 'Notes');
+    return source.source === 'youdao' ? '有道云笔记' : 'Evernote';
   }
 
   function sameSource(left = {}, right = {}) {
@@ -877,6 +877,7 @@
   function fallbackSources() {
     return [
       { source: 'youdao', name: 'YoudaoNote', account: 'YoudaoNote', status: 'manual' },
+      { source: 'evernote', name: 'Evernote', account: 'Evernote', status: 'manual' },
     ];
   }
 
@@ -1572,7 +1573,8 @@
     }
 
     for (const [index, record] of records.entries()) {
-      const completed = record.status === 'COMPLETED';
+        const completed = record.status === 'COMPLETED';
+        const retryDisabled = !completed && record.format === 'json';
       const size = record.totalBytes ? (record.totalBytes / (1024 * 1024)).toFixed(1) + ' MB' : '';
       const statusText = t('status.' + (record.status || 'INFO'));
       const row = document.createElement('div');
@@ -1596,7 +1598,7 @@
           <div class="font-data-tabular text-data-tabular text-on-surface-variant">${record.timestamp ? new Date(record.timestamp).toLocaleString() : ''}</div>
           <div class="font-mono-label text-mono-label ${completed ? 'text-primary' : 'text-error'} mt-xs">${escapeHtml(statusText)}</div>
         </div>
-        <button data-action="history-record-action" class="btn-history-action text-on-surface-variant hover:text-primary transition-colors ml-sm" data-history-index="${index}" data-dest="${escapeHtml(record.destPath || '')}" data-status="${escapeHtml(record.status || '')}">
+        <button data-action="history-record-action" class="btn-history-action text-on-surface-variant hover:text-primary transition-colors ml-sm ${retryDisabled ? 'opacity-40 cursor-not-allowed' : ''}" data-history-index="${index}" data-dest="${escapeHtml(record.destPath || '')}" data-status="${escapeHtml(record.status || '')}" data-retry-disabled="${retryDisabled ? 'true' : 'false'}" ${retryDisabled ? 'disabled' : ''}>
           <span class="material-symbols-outlined text-[20px]">${completed ? 'folder_open' : 'replay'}</span>
         </button>`;
       listEl.appendChild(row);
@@ -1635,9 +1637,10 @@
       return;
     }
 
-    const action = event.target.closest('.btn-history-action');
-    if (action) {
-      const records = window.noteUnarchiveState?.historyRecords || [];
+      const action = event.target.closest('.btn-history-action');
+      if (action) {
+        if (action.dataset.retryDisabled === 'true') return;
+        const records = window.noteUnarchiveState?.historyRecords || [];
       const record = records[Number(action.dataset.historyIndex)] || {};
       if (action.dataset.status === 'COMPLETED') {
         if (!window.api) {

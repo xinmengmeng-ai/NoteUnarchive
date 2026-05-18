@@ -11,7 +11,6 @@ describe('renderer interactions', () => {
     expect(html).not.toContain('Obsidian');
     expect(html).not.toContain('Bear');
     expect(html).not.toContain('Local Database Detected');
-    expect(html).not.toContain("{ source: 'evernote'");
   });
 
   test('progress screen does not ship prototype progress or fake log rows', () => {
@@ -89,6 +88,11 @@ describe('renderer interactions', () => {
 
   test('format cards expose per-card check icons and update them from renderer state', () => {
     expect([...html.matchAll(/<span data-format-check/g)]).toHaveLength(3);
+    expect(html).toContain('value="markdown"');
+    expect(html).toContain('value="docx"');
+    expect(html).toContain('value="html"');
+    expect(html).not.toContain('value="json"');
+    expect(html).toContain('Word');
     expect(html).toContain("checkIcon.classList.toggle('hidden', !input.checked)");
   });
 
@@ -116,5 +120,7 @@ describe('renderer interactions', () => {
     expect(html).toContain('record.config');
     expect(html).toContain('selectedSource = Object.assign');
     expect(html).toContain('openPath');
+    expect(html).toContain("record.format === 'json'");
+    expect(html).toContain('data-retry-disabled');
   });
 });
