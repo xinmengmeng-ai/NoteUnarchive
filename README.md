@@ -2,6 +2,8 @@
 
 [中文](README.zh-CN.md) | English
 
+<img width="2141" height="1380" alt="1a176433-8a40-4ac8-8595-b588379f6257" src="https://github.com/user-attachments/assets/8777c67b-ec1e-403b-8b0f-8b1f80b15809" />
+
 NoteUnarchive is a local-first desktop tool for exporting notes from locally stored note application data into open formats.
 
 It does not require cloud API access, account passwords, or remote synchronization during export. Only notes already available in the local client cache can be exported.
