@@ -6,6 +6,9 @@ NoteUnarchive is a local-first desktop tool for exporting notes from locally sto
 
 It does not require cloud API access, account passwords, or remote synchronization during export. Only notes already available in the local client cache can be exported.
 
+
+<img width="2141" height="1380" alt="NoteUnarchive" src="https://github.com/user-attachments/assets/d0d89501-b6b3-4f24-b5e4-e192ef065fbd" />
+
 ## Supported Sources
 
 | Source | Local data | Status |
