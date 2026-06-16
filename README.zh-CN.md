@@ -6,6 +6,10 @@ NoteUnarchive 是一款本地优先的桌面笔记导出工具，用于直接读
 
 它不需要云端 API、账号密码或远程同步权限。只有已经同步或缓存到本地的笔记可以被导出。
 
+
+<img width="690" height="444" alt="image" src="https://github.com/user-attachments/assets/49956260-78a9-4a69-8055-2078099ae37b" />
+
+
 ## 支持的数据源
 
 | 数据源 | 本地数据 | 状态 |
